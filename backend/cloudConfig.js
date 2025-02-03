@@ -15,7 +15,7 @@ const storage = new CloudinaryStorage({
     if (file.mimetype.startsWith("audio/")) {
       return {
         folder,
-        resource_type: "video", // Treat audio files as raw
+        resource_type: "raw", // Treat audio files as raw
         format: "wav",
       };
     }
