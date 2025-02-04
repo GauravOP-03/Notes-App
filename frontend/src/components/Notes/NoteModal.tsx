@@ -35,17 +35,17 @@ export const NoteModal = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      // You can handle multiple files or just one
       setEditedNote((prev) => ({
         ...prev,
-        file: files[0], // Assuming we only allow one file
+        file: files[0],
       }));
     }
   };
 
   const handleSave = () => {
-    onSave(editedNote); // Save the changes
-    onClose(); // Close the modal after saving
+    onSave(editedNote);
+    console.log(editedNote);
+    onClose();
   };
 
   return (
@@ -134,20 +134,6 @@ export const NoteModal = ({
             </div>
           )}
 
-          {/* File Upload Section */}
-          {editedNote.file && (
-            <div className="mt-6">
-              <p className="font-semibold text-gray-800">File:</p>
-              <a
-                href={URL.createObjectURL(editedNote.file)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500"
-              >
-                {editedNote.file.name}
-              </a>
-            </div>
-          )}
           <div className="mt-6">
             <label className="block font-semibold text-gray-800">
               Upload File:

@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "../ui/toaster";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { BACKEND_URL } from "@/config";
 export default function LoginForm() {
   const [formData, setFormData] = useState({
     email: "",
@@ -20,21 +21,23 @@ export default function LoginForm() {
     });
   };
   const { toast } = useToast();
+
+  function onSignupClick() {
+    navigate("/signup");
+  }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     axios
-      .post("http://localhost:3000/api/login", formData)
+      .post(`${BACKEND_URL}/login`, formData)
       .then((res) => {
-        console.log(res);
-
         const { token, userId } = res.data;
         localStorage.setItem("token", token);
         localStorage.setItem("userId", userId);
+
+        navigate("/notes");
         toast({
           description: "Login Successfully",
         });
-
-        navigate("/notes");
       })
       .catch((e) => {
         console.error(e);
@@ -81,6 +84,16 @@ export default function LoginForm() {
               Login
             </Button>
           </form>
+          {/* Signup Link */}
+          <p className="text-center text-sm text-gray-500 mt-4">
+            Don't have an account?{" "}
+            <a
+              onClick={onSignupClick}
+              className="text-blue-600 hover:underline cursor-pointer"
+            >
+              Sign up
+            </a>
+          </p>
         </CardContent>
       </Card>
     </div>

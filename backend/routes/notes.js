@@ -58,7 +58,7 @@ router.get("/", verifyToken, async (req, res) => {
 router.delete("/:id/delete", verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
-    console.log(req.params);
+    // console.log(req.params);
     if (!id) {
       return res.status(404).json({ message: "Note not Found" });
     }
@@ -85,7 +85,7 @@ router.put("/:id", verifyToken, upload.single("file"), async (req, res) => {
       },
       { runValidators: true }
     );
-    console.log(d);
+    // console.log(d);
     res.status(200).json({ message: "Note Updated" });
   } catch (e) {
     res.status(e);

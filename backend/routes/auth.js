@@ -7,11 +7,11 @@ require("dotenv").config();
 const router = express.Router();
 
 router.post("/signup", async (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
   const { username, email, password } = req.body;
   try {
     const findUser = await user.findOne({ email });
-    console.log(findUser);
+    // console.log(findUser);
     if (findUser) {
       return res.status(409).json({ message: "User already exist" });
     }
@@ -19,8 +19,8 @@ router.post("/signup", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = new user({ username, email, password: hashedPassword });
-    const d = await newUser.save();
-    console.log(d);
+    await newUser.save();
+    // console.log(d);
 
     res.json({ message: "User registered successfully!" });
   } catch (error) {
@@ -31,7 +31,7 @@ router.post("/signup", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  console.log(req.body);
+  // console.log(req.body);
 
   try {
     const findUser = await user.findOne({ email });

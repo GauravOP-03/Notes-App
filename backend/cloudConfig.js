@@ -11,19 +11,18 @@ const storage = new CloudinaryStorage({
   params: async (req, file) => {
     let folder = "notes_files";
 
-    // Check if the file is an audio file
     if (file.mimetype.startsWith("audio/")) {
       return {
         folder,
-        resource_type: "raw", // Treat audio files as raw
-        format: "wav",
+        resource_type: "raw", // Required for non-image/video files
+        format: file.mimetype.split("/")[1], // Preserve original format
       };
     }
 
-    // Default for images
     return {
       folder,
-      allowedFormats: ["png", "jpeg", "jpg"],
+      resource_type: "image", // Explicitly set for images
+      allowed_formats: ["png", "jpeg", "jpg"], // Correct key name
     };
   },
 });

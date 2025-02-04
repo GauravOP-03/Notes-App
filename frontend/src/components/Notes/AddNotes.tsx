@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import axios from "axios";
 import { useState } from "react";
 import VoiceRecorder from "./VoiceRecorder";
+import { BACKEND_URL } from "@/config";
 
 const AddNotes = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,8 +62,8 @@ const AddNotes = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault(); // Prevent page refresh
     setIsPending(true);
-
-    console.log(voiceData);
+    console.log(voiceData.transcribedText.length);
+    // console.log(voiceData);
     const handleData = async () => {
       const data = new FormData();
       data.append("heading", formData.heading);
@@ -71,14 +72,14 @@ const AddNotes = () => {
         data.append("image", formData.image);
       }
       if (voiceData.transcribedText.length) {
-        data.append("voiceData", voiceData.transcribedText);
+        data.append("transcribedText", voiceData.transcribedText);
       }
       if (voiceData.audioFile) {
         data.append("audioFile", voiceData.audioFile);
       }
 
       axios
-        .post("http://localhost:3000/api/notes", data, {
+        .post(`${BACKEND_URL}/notes`, data, {
           headers: {
             "Content-Type": "multipart/form-data",
             Authorization: localStorage.getItem("token"),
@@ -102,8 +103,11 @@ const AddNotes = () => {
   };
 
   return (
-    <div>
-      <Button onClick={() => setIsOpen(true)} className="px-4 py-2">
+    <div className="fixed bottom-12 left-1/2 z-40">
+      <Button
+        onClick={() => setIsOpen(true)}
+        className="px-10  -translate-x-16 -translate-y-10 py-6 text-sm font-medium rounded-full shadow-2xl bg-white/95 backdrop-blur-lg hover:scale-110 hover:text-white/95 transition-all border border-gray-400 text-gray-900"
+      >
         Add Notes
       </Button>
 
@@ -164,6 +168,7 @@ const AddNotes = () => {
                   <Input type="file" name="image" onChange={handleFileChange} />
                   {formData.image && (
                     <img
+                      height={100}
                       src={URL.createObjectURL(formData.image)}
                       alt="Preview"
                     />
