@@ -4,7 +4,7 @@
   "description": "Notes App",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently \"cd frontend && npm start\" \"cd backend && node index.js\"",
+    "start": "concurrently \"cd frontend && npm run dev\" \"cd backend && node index.js\"",
     "install-deps": "npm install && cd frontend && npm install && cd ../backend && npm install",
     "dev": "concurrently \"cd frontend && npm start\" \"cd backend && npm run dev\""
   },
