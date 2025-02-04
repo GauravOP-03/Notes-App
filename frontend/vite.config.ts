@@ -10,4 +10,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+
+  server: {
+    host: "0.0.0.0",
+    allowedHosts: ["97nz69-5173.csb.app"],
+  },
 });
