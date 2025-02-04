@@ -16,11 +16,13 @@
     "backend":{
       "name":"Start Backend",
       "command":"cd backend && npm run dev",
+      "cwd":"backend",
       "runAtStart":true
     },
     "frontend":{
       "name":"Start Frontend",
       "command":"cd frontend && npm run dev",
+      "cwd":"frontend",
       "runAtStart":true
     }
   }
