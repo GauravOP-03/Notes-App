@@ -7,7 +7,6 @@ import axios from "axios";
 import { useState } from "react";
 import VoiceRecorder from "./VoiceRecorder";
 import { BACKEND_URL } from "@/config";
-
 const AddNotes = () => {
   const [isOpen, setIsOpen] = useState(false);
 
