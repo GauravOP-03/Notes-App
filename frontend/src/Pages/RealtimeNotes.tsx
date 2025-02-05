@@ -15,7 +15,7 @@ export default function RealTimeTextUI() {
   const [socket, setSocket] = useState<Socket | null>(null); // Track the socket instance
 
   useEffect(() => {
-    const socketInstance = io("http://localhost:3000");
+    const socketInstance = io("https://97nz69-3000.csb.app/");
     setSocket(socketInstance);
 
     // Listen for incoming words

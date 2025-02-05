@@ -15,7 +15,7 @@ const io = new Server(server, {
   },
 });
 async function main() {
-  await mongoose.connect(process.env.MONGO_URI);
+  await mongoose.connect(process.env.MONGO_URL);
 }
 
 main()
@@ -49,5 +49,5 @@ io.on("connection", (socket) => {
 });
 
 server.listen(3000, () => {
-  console.log("Server running on port 5000");
+  console.log("Server running on port 3000");
 });
