@@ -12,7 +12,6 @@ export default defineConfig({
   },
 
   server: {
-    host: "0.0.0.0",
-    allowedHosts: ["97nz69-5173.csb.app"],
+    allowedHosts: true,
   },
 });
