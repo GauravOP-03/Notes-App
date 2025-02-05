@@ -6,7 +6,7 @@ A feature-rich notes application with voice note recording, transcription, image
 
 - 🔐 **User Authentication**: Secure login and signup using JWT.  
 - 🔑 **Password Security**: Passwords are hashed using bcrypt.  
-- 🎙️ **Voice Notes**: Record voice notes (up to 1 minute) using `react-voice-recorder`.  
+- 🎙️ **Voice Notes**: Record voice notes (up to 1 minute) using `react-media-recorder`.  
 - 📝 **Transcription**: Convert voice notes to text using the Web Speech API.  
 - 🖼️ **Image Support**: Attach images to notes.  
 - 🗄️ **MongoDB Storage**: Store notes and user data securely.  
