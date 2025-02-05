@@ -6,14 +6,14 @@ import { NoteModal } from "./NoteModal";
 import { useState } from "react";
 import { Note, useNotes } from "@/hooks";
 
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-interface AllNotesProps {
+interface NotesCardsProps {
   notes: Note[];
   onDelete: (id: string) => void;
   onSave: (updatedNote: Note) => void;
 }
-export default function AllNotes({ notes, onDelete, onSave }: AllNotesProps) {
+export default function AllNotes({ notes, onDelete, onSave }: NotesCardsProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
@@ -59,7 +59,7 @@ export default function AllNotes({ notes, onDelete, onSave }: AllNotesProps) {
         </div>
 
         <div className="flex flex-1">
-          {/* Sidebar - Hidden on Small Screens */}
+          {/* Sidebar - Visible on Large Screens */}
           <div className="hidden md:flex w-64 bg-gray-100 p-4 flex-col items-center shadow-md fixed h-full">
             <Card className="w-full text-center mt-20 mb-4">
               <CardHeader className="flex flex-col items-center gap-2">
@@ -76,6 +76,17 @@ export default function AllNotes({ notes, onDelete, onSave }: AllNotesProps) {
                 </Button>
               </CardContent>
             </Card>
+            {/* Real Time Notes Link in Sidebar */}
+            {user && (
+              <Link
+                to={`/${user?._id}/notes`}
+                target="_blank"
+                className="px-8 py-6 rounded-md text-md font-medium shadow-2xl bg-white/95 backdrop-blur-lg 
+                       hover:scale-110 hover:text-white/95 transition-all border border-gray-400 text-gray-900 hover:bg-black mt-4"
+              >
+                Real Time Notes
+              </Link>
+            )}
           </div>
 
           {/* Main Content */}
@@ -121,7 +132,6 @@ export default function AllNotes({ notes, onDelete, onSave }: AllNotesProps) {
                           {note.heading}
                         </h3>
                       </div>
-
                       <Button
                         variant="ghost"
                         className="absolute top-2 right-2 text-gray-500 hover:text-red-600"
@@ -156,6 +166,20 @@ export default function AllNotes({ notes, onDelete, onSave }: AllNotesProps) {
           </div>
         </div>
 
+        {/* Real Time Notes Link at the Bottom for Mobile */}
+        {user && (
+          <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 shadow-md text-center mb-1  translate-x-3">
+            <Link
+              to={`/${user?._id}/notes`}
+              target="_blank"
+              className="px-4 py-2 rounded-md text-md font-medium shadow-2xl bg-white/95 backdrop-blur-lg 
+                     hover:scale-110 hover:text-white/95 transition-all border border-gray-400 text-gray-900 hover:bg-black"
+            >
+              Real Time Notes
+            </Link>
+          </div>
+        )}
+
         {/* User Info at Bottom - Visible on Large Screens */}
         <div className="hidden md:block w-full bg-gray-100 p-4 shadow-md text-center">
           {user && (
@@ -166,7 +190,7 @@ export default function AllNotes({ notes, onDelete, onSave }: AllNotesProps) {
           )}
         </div>
 
-        {/* Modal component */}
+        {/* Modal Component */}
         <NoteModal
           isOpen={isModalOpen}
           onClose={closeModal}
