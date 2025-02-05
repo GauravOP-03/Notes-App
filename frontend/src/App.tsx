@@ -1,6 +1,7 @@
 import Error from "./components/Notes/Error";
 import Index from "./components/Notes/Index";
 import MainPage from "./components/Notes/MainPage";
+import RealtimeNotes from "./components/Notes/RealtimeNotes";
 import LoginForm from "./components/User/Login";
 import SignupForm from "./components/User/SignUp";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -10,7 +11,7 @@ function App() {
     { path: "/notes", element: <Index /> },
     { path: "/signup", element: <SignupForm /> },
     { path: "/login", element: <LoginForm /> },
-
+    { path: "/:id/notes", element: <RealtimeNotes /> },
     { path: "*", element: <Error /> },
   ]);
   return (
