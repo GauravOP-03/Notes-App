@@ -1,10 +1,10 @@
 import AddNotes from "./AddNotes";
-import AllNote from "./AllNotes";
+import NotesMain from "./NotesMain";
 
 export default function Index() {
   return (
     <>
-      <AllNote />
+      <NotesMain />
       <AddNotes />
     </>
   );
