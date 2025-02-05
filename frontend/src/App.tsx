@@ -1,7 +1,7 @@
 import Error from "./components/Notes/Error";
 import Index from "./Pages/Index";
 import MainPage from "./Pages/MainPage";
-import RealtimeNotes from "./lib/RealtimeNotes";
+import RealtimeNotes from "./Pages/RealtimeNotes";
 import LoginForm from "./components/User/Login";
 import SignupForm from "./components/User/SignUp";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
