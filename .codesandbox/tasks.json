@@ -15,7 +15,7 @@
   "tasks": {
     "backend":{
       "name":"Start Backend",
-      "command":"cd backend && npm run dev",
+      "command":"cd backend && node index.js",
       "cwd":"backend",
       "runAtStart":true
     },
