@@ -7,9 +7,15 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 
 app.use(cors());
-
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Adjust as needed
+    methods: ["GET", "POST"],
+  },
+});
 async function main() {
-  await mongoose.connect(process.env.MONGO_URL);
+  await mongoose.connect(process.env.MONGO_URI);
 }
 
 main()
@@ -25,6 +31,23 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", require("./routes/auth"));
 app.use("/api/notes", require("./routes/notes"));
 
-app.listen(3000, () => {
-  console.log("app is listening");
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+
+  socket.on("joinRoom", (roomId) => {
+    socket.roomId = roomId;
+    socket.join(roomId);
+  });
+  socket.on("sendWord", (word) => {
+    socket.to(socket.roomId).emit("receiveWord", word);
+    // console.log(roomId);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
+server.listen(3000, () => {
+  console.log("Server running on port 5000");
 });

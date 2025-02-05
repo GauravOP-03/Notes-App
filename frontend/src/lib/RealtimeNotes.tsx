@@ -3,7 +3,7 @@ import io, { Socket } from "socket.io-client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useParams } from "react-router-dom";
-import { Button } from "../ui/button";
+import { Button } from "../components/ui/button";
 import { Share } from "lucide-react";
 
 export default function RealTimeTextUI() {
