@@ -12,6 +12,7 @@ export default defineConfig({
   },
 
   server: {
+    post: 5173,
     allowedHosts: true,
   },
 });
