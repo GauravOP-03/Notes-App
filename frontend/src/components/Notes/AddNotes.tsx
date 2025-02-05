@@ -102,7 +102,7 @@ const AddNotes = () => {
   };
 
   return (
-    <div className="fixed bottom-12 left-1/2 z-40">
+    <div className="fixed bottom-12 left-1/2 z-40 ">
       <Button
         onClick={() => setIsOpen(true)}
         className="px-10  -translate-x-16 -translate-y-10 py-6 text-sm font-medium rounded-full shadow-2xl bg-white/95 backdrop-blur-lg hover:scale-110 hover:text-white/95 transition-all border border-gray-400 text-gray-900"
@@ -114,12 +114,12 @@ const AddNotes = () => {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/50 z-40"
+            className="fixed inset-0 bg-black/50 z-40 "
             onClick={() => setIsOpen(false)}
           />
 
           {/* Modal */}
-          <Card className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-50 bg-white">
+          <Card className="fixed top-1/2 left-1/2 -translate-x-1/2 h-3/4 overflow-y-auto -translate-y-1/2 w-full max-w-md z-50 bg-white">
             <CardHeader className="relative">
               <CardTitle>Add Notes</CardTitle>
               <button
