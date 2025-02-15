@@ -27,7 +27,7 @@ router.post("/", verifyToken, uploadFields, async (req, res) => {
       date: new Date(),
       heading: heading,
       noteBody: noteBody,
-      image: imagePath,
+      image: [imagePath],
       owner: req.user.id,
       transcribedText: transcribedText,
       audioFile: audioFile,
@@ -70,10 +70,13 @@ router.delete("/:id/delete", verifyToken, async (req, res) => {
 });
 
 router.put("/:id", verifyToken, upload.single("file"), async (req, res) => {
+  // console.log("Edit request");
+  // console.log(imagePath);
   try {
+    const image = req.file ? req.file.path : null;
+    // console.log(image);
     const { id } = req.params;
     const { heading, noteBody } = req.body;
-    const imagePath = req.file ? req.file.path : null;
 
     const d = await note.findByIdAndUpdate(
       id,
@@ -81,13 +84,14 @@ router.put("/:id", verifyToken, upload.single("file"), async (req, res) => {
         date: new Date(),
         heading,
         noteBody,
-        $push: { image: imagePath },
+        $push: { image },
       },
-      { runValidators: true }
+      { runValidators: true, new: true }
     );
     // console.log(d);
     res.status(200).json({ message: "Note Updated" });
   } catch (e) {
+    // console.log(e);
     res.status(e);
   }
 });
