@@ -58,11 +58,11 @@ export const NoteModal = ({
 
       {/* Modal content */}
       <div
-        className={`fixed inset-0 flex justify-center items-center p-4 z-50 transition-all transform overflow-y-auto ${
+        className={`fixed inset-0 flex justify-center items-center p-4 z-50 transition-all transform ${
           isOpen ? "opacity-100 scale-100" : "opacity-0 scale-95"
         }`}
       >
-        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-4xl w-full transition-transform transform">
+        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-4xl w-full  transition-transform transform max-h-[90vh] overflow-y-auto">
           {/* Modal Header */}
           <h2 className="text-3xl font-semibold text-gray-800">
             <input
