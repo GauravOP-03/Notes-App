@@ -58,7 +58,7 @@ export const NoteModal = ({
 
       {/* Modal content */}
       <div
-        className={`fixed inset-0 flex justify-center items-center p-4 z-50 transition-all transform ${
+        className={`fixed inset-0 flex justify-center items-center p-4 z-50 transition-all transform overflow-y-auto ${
           isOpen ? "opacity-100 scale-100" : "opacity-0 scale-95"
         }`}
       >

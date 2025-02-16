@@ -37,6 +37,7 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", (roomId) => {
     socket.roomId = roomId;
     socket.join(roomId);
+    socket.to(roomId).emit("playerJoin", "New user connected");
   });
   socket.on("sendWord", (word) => {
     socket.to(socket.roomId).emit("receiveWord", word);
@@ -44,6 +45,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
+    socket.to(socket.roomId).emit("playerJoin", "User disconnected");
     console.log("User disconnected:", socket.id);
   });
 });

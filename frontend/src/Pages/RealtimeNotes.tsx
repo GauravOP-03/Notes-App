@@ -5,7 +5,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useParams } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Share } from "lucide-react";
-
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 export default function RealTimeTextUI() {
   const [text, setText] = useState("");
   const [receivedText, setReceivedText] = useState("");
@@ -13,14 +14,18 @@ export default function RealTimeTextUI() {
   const { id } = useParams();
 
   const [socket, setSocket] = useState<Socket | null>(null); // Track the socket instance
-
+  const { toast } = useToast();
   useEffect(() => {
     const socketInstance = io("https://97nz69-3000.csb.app/");
     setSocket(socketInstance);
 
     // Listen for incoming words
     socketInstance.emit("joinRoom", id);
-
+    socketInstance.on("playerJoin", (data) => {
+      toast({
+        description: data,
+      });
+    });
     socketInstance.on("receiveWord", (word) => {
       setReceivedText(word);
     });
@@ -51,6 +56,7 @@ export default function RealTimeTextUI() {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100 p-4">
+      <Toaster />
       <Card className="w-full max-w-md p-4 shadow-lg">
         <CardContent className="space-y-4">
           <h2 className="text-xl font-semibold">Real-time Word Sharing</h2>
