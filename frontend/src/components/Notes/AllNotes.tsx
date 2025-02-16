@@ -149,10 +149,10 @@ export default function AllNotes({ notes, onDelete, onSave }: NotesCardsProps) {
                       </p>
                     </CardContent>
                     <CardFooter className="flex items-center justify-between">
-                      {note.image?.length > 0 && (
+                      {note.image?.filter(Boolean).length > 0 && (
                         <span className="inline-flex items-center gap-1 text-xs text-gray-500">
                           <ImageIcon className="w-4 h-4" />
-                          {note.image.length} Image
+                          {note.image.filter(Boolean).length} Image
                         </span>
                       )}
                       {note.audioFile && (

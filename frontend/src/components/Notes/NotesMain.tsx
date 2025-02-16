@@ -25,9 +25,8 @@ export default function NotesMain() {
       })
       .then((data) => {
         console.log(data);
+        window.location.reload();
       });
-
-    window.location.reload();
   }
 
   function onSave(editedData: Note) {
@@ -42,9 +41,8 @@ export default function NotesMain() {
       })
       .then((data) => {
         console.log(data);
+        window.location.reload();
       });
-
-    window.location.reload();
   }
 
   if (error) {
