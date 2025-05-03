@@ -1,0 +1,7 @@
+CLOUD_NAME=cloudinary
+API_KEY=cloudinaryApiKey
+API_SECRET=cloudinaryApiSecret
+JWT_SECRET=jwt
+MONGO_URI=mongoDatabaseURL
+
+change config in frontend
