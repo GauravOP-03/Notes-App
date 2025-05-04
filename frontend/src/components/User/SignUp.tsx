@@ -20,6 +20,7 @@ export default function SignupForm() {
   });
 
   const [errors, setErrors] = useState<Partial<typeof formData>>({});
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -49,6 +50,7 @@ export default function SignupForm() {
         username: formData.username,
         email: formData.email,
         password: formData.password,
+        confirmPassword: formData.confirmPassword
       });
 
       await axios.post(`${BACKEND_URL}/signup`, {
@@ -60,6 +62,7 @@ export default function SignupForm() {
       toast({
         description: "Account created successfully. Login to continue.",
       });
+      setLoading(true);
 
       navigate("/login");
     } catch (error) {
@@ -73,9 +76,13 @@ export default function SignupForm() {
         setErrors(fieldErrors);
       } else {
         toast({
-          description: "Signup failed. Please try again.",
+          description: axios.isAxiosError(e) && e.response?.data?.message
+          ? e.response.data.message
+          : "Login failed. Please try again.",
         });
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -154,8 +161,8 @@ export default function SignupForm() {
               )}
             </div>
 
-            <Button type="submit" className="w-full">
-              Sign Up
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Creating Account..." : "Sign Up"}
             </Button>
           </form>
 

@@ -27,7 +27,7 @@ export const NoteModal = ({
 
   // console.log(note)
   const [editedNote, setEditedNote] = useState<Note>(note);
-  console.log("edited note:", editedNote)
+  // console.log("edited note:", editedNote)
   const [loading, setLoading] = useState(false)
 
   // Handle input changes
@@ -36,7 +36,7 @@ export const NoteModal = ({
   ) => {
     const { name, value } = e.target;
     setEditedNote((prev) => ({ ...prev, [name]: value }));
-    console.log(editedNote)
+    // console.log(editedNote)
   };
 
   // Handle file input changes
@@ -50,9 +50,27 @@ export const NoteModal = ({
     }
   };
 
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+  const [deleteAudio, setDeleteAudio] = useState<boolean>(false);
+
+
   const handleSave = async () => {
     setLoading(true)
     try {
+
+      for (const img of imagesToDelete) {
+        await axios.delete(`${BACKEND_URL}/notes/${editedNote._id}/image`, {
+          headers: { Authorization: localStorage.getItem("token") },
+          data: { img }
+        });
+      }
+
+      if (deleteAudio && note.audioFile) {
+        await axios.delete(`${BACKEND_URL}/notes/${editedNote._id}/voice`, {
+          headers: { Authorization: localStorage.getItem("token") },
+          data: { voice: note.audioFile }
+        });
+      }
 
       await onSave(editedNote);
       console.log(editedNote);
@@ -61,43 +79,59 @@ export const NoteModal = ({
       console.log(e)
     } finally {
       setLoading(false)
+      setDeleteAudio(false);
+      setImagesToDelete([]);
     }
   };
 
-  const deleteImage = async (img: string, id: string) => {
-    try {
+  // const deleteImage = async (img: string, id: string) => {
+  //   try {
 
-      const response = await axios.delete(`${BACKEND_URL}/notes/${id}/image`, {
-        headers: {
-          Authorization: localStorage.getItem("token"),
-        },
-        data: { img }
-      })
-      console.log(response)
-      const updatedImages = response.data.data.image
-      console.log(updatedImages)
-      setEditedNote((prev) => ({ ...prev, image: updatedImages }))
-      await onSave(editedNote);
-    } catch (e) {
-      console.log(e)
-    }
-  }
-
-  const deleteVoice = async (voice: string, id: string) => {
-    try {
-      await axios.delete(`${BACKEND_URL}/notes/${id}/voice`, {
-        headers: {
-          Authorization: localStorage.getItem("token") || "",
-        },
-        data: { voice },
-      });
-      const updatedNote = { ...editedNote, audioFile: null };
-      setEditedNote(updatedNote);
-      await onSave(updatedNote);
-    } catch (e) {
-      console.error(e);
-    }
+  //     const response = await axios.delete(`${BACKEND_URL}/notes/${id}/image`, {
+  //       headers: {
+  //         Authorization: localStorage.getItem("token"),
+  //       },
+  //       data: { img }
+  //     })
+  //     console.log(response)
+  //     const updatedImages = response.data.data.image
+  //     console.log(updatedImages)
+  //     setEditedNote((prev) => ({ ...prev, image: updatedImages }))
+  //     await onSave(editedNote);
+  //   } catch (e) {
+  //     console.log(e)
+  //   }
+  // }
+  const markImageForDeletion = (img: string) => {
+    setEditedNote(prev => ({
+      ...prev,
+      image: prev.image?.filter(i => i !== img)
+    }));
+    setImagesToDelete(prev => [...prev, img]);
   };
+
+  const markAudioForDeletion = () => {
+    setEditedNote(prev => ({ ...prev, audioFile: null }));
+    setDeleteAudio(true);
+    console.log("maked audio")
+  };
+
+
+  // const deleteVoice = async (voice: string, id: string) => {
+  //   try {
+  //     await axios.delete(`${BACKEND_URL}/notes/${id}/voice`, {
+  //       headers: {
+  //         Authorization: localStorage.getItem("token") || "",
+  //       },
+  //       data: { voice },
+  //     });
+  //     const updatedNote = { ...editedNote, audioFile: null };
+  //     setEditedNote(updatedNote);
+  //     await onSave(updatedNote);
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // };
 
 
   return (
@@ -147,32 +181,32 @@ export const NoteModal = ({
           />
 
           {/* Voice Section */}
-          {editedNote.audioFile && (
+          {editedNote.audioFile && !deleteAudio && (
             <div className="space-y-2">
               <p className="font-semibold text-gray-800">Audio:</p>
               <audio controls className="w-full">
                 <source src={editedNote.audioFile} type="audio/wav" />
                 Your browser does not support the audio element.
               </audio>
-              <Button onClick={() => editedNote.audioFile && deleteVoice(editedNote.audioFile, editedNote._id)}>Delete</Button>
+              <Button onClick={editedNote.audioFile ? markAudioForDeletion : undefined}>Delete</Button>
             </div>
           )}
 
           {/* Transcribed Text Section */}
-          {editedNote.transcribedText && (
+          {editedNote.transcribedText !== "null" && (
             <div className="p-4 bg-gray-100 rounded-lg">
               <p className="font-semibold text-gray-800 mb-2">
                 Transcribed Text:
               </p>
-              <p className="text-gray-700">{editedNote.transcribedText}</p>
+              <textarea className="w-full h-40 p-4 border rounded-lg text-gray-700 text-base resize-none focus:ring-2 focus:ring-gray-300 focus:outline-none" value={editedNote.transcribedText} onChange={handleChange} name="transcribedText" placeholder="write null to delete permanently.."></textarea>
             </div>
           )}
 
           {/* Images Section */}
           {editedNote.image &&
-            editedNote.image.length &&
+            editedNote.image.length > 0 &&
             editedNote.image.filter(Boolean).length > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <p className="font-semibold text-gray-800">Images:</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {editedNote.image.map(
@@ -180,26 +214,44 @@ export const NoteModal = ({
                       img && (
                         <div
                           key={idx}
-                          className="group overflow-hidden rounded-lg shadow-md"
+                          className={`relative rounded-xl overflow-hidden shadow-lg group aspect-[4/3] border-2 ${imagesToDelete.includes(img)
+                            ? "border-red-500 opacity-60"
+                            : "border-transparent"
+                            }`}
                         >
                           <a
                             href={img}
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="block w-full h-full"
                           >
                             <img
                               src={img}
                               alt={`Image ${idx}`}
-                              className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-105"
+                              className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105`}
                             />
                           </a>
-                          <Button onClick={() => deleteImage(img, editedNote._id)}>Delete</Button>
+                          {/* Overlay for deleted images */}
+                          {imagesToDelete.includes(img) && (
+                            <div className="absolute inset-0 bg-red-500 bg-opacity-40 flex items-center justify-center text-white text-sm font-semibold pointer-events-none">
+                              Marked for Deletion
+                            </div>
+                          )}
+                          {/* Delete Button */}
+                          <button
+                            onClick={() => markImageForDeletion(img)}
+                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Delete Image"
+                          >
+                            ✕
+                          </button>
                         </div>
                       )
                   )}
                 </div>
               </div>
             )}
+
 
           {/* Upload Section */}
           <div>
