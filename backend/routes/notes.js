@@ -82,7 +82,7 @@ router.put("/:id", verifyToken, upload.single("file"), async (req, res) => {
     console.log("Uploaded image path:", image);
 
     const { id } = req.params;
-    const { heading, noteBody } = req.body;
+    const { heading, noteBody, audioFile, transcribedText } = req.body;
 
     // Validate required fields
     if (!id || !heading || !noteBody) {
@@ -96,6 +96,8 @@ router.put("/:id", verifyToken, upload.single("file"), async (req, res) => {
         date: new Date(),
         heading,
         noteBody,
+        audioFile,
+        transcribedText,
         ...(image && { $push: { image } }), // Only push image if it exists
       },
       { runValidators: true, new: true }
