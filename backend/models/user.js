@@ -9,10 +9,26 @@ const userSchema = new Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
   },
   password: {
     type: String,
-    required: true,
+    required: function () {
+      return this.provider === "Email";
+    },
+  },
+  provider: {
+    type: String,
+    enum: ["Email", "Google"],
+    default: "Email",
+  },
+  avatarUrl: {
+    type: String,
+  },
+  firebaseUid: {
+    type: String,
+    unique: true,
+    sparse: true,
   },
 });
 
