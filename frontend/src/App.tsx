@@ -1,6 +1,6 @@
 import { lazy } from "react";
-const Error = lazy(() => import("./components/Notes/Error"));
-const Index = lazy(() => import("./pages/Index"));
+const Error = lazy(() => import("./components/Error"));
+const NotesPage = lazy(() => import("./pages/NotesPage"));
 const MainPage = lazy(() => import("./pages/MainPage"));
 const RealtimeNotes = lazy(() => import("./pages/RealtimeNotes"));
 const LoginForm = lazy(() => import("./components/User/Login"));
@@ -20,7 +20,7 @@ function App() {
         </PrivateRoute>
       ),
     },
-    { path: "/notes", element: <Index /> },
+    { path: "/notes", element: <NotesPage /> },
     { path: "/signup", element: <SignupForm /> },
     { path: "/login", element: <LoginForm /> },
     {

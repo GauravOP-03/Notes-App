@@ -1,4 +1,5 @@
 import { BACKEND_URL } from "@/config";
+import { useEffect } from 'react';
 import { UserProp } from "@/types/schema";
 import axios from "axios";
 import { createContext, JSX, useContext, useState } from "react";
@@ -13,13 +14,17 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
     const [user, setUser] = useState<UserProp | null>(null);
 
     const login = async () => {
-        const res = await axios.post(`${BACKEND_URL}/me`, {}, { withCredentials: true, })
+        const res = await axios.get(`${BACKEND_URL}/me`, { withCredentials: true, })
         console.log(res.data)
         setUser(res.data);
     };
     const logout = () => {
         setUser(null);
     };
+
+    useEffect(() => {
+        login();
+    }, [])
 
     return (
         <AuthContext.Provider value={{ user, login, logout }}>

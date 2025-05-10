@@ -105,7 +105,7 @@ const AddNotes = () => {
   };
 
   return (
-    <div className="fixed bottom-12 left-1/2 z-30">
+    <div className="fixed bottom-12 left-1/2 z-40">
       <Button
         onClick={() => setIsOpen(true)}
         className="px-10  -translate-x-16 -translate-y-10 py-6 text-sm font-medium rounded-full shadow-2xl bg-white/95 backdrop-blur-lg hover:scale-110 hover:text-white/95 transition-all border border-gray-400 text-gray-900"

@@ -149,7 +149,7 @@ router.post("/google-login", async (req, res) => {
   }
 });
 
-router.post("/me", verifyToken, async (req, res) => {
+router.get("/me", verifyToken, async (req, res) => {
   // console.log(req.user);
   const { userId } = req.user;
   const existingUser = await user.findById(userId).exec();
