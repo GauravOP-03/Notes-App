@@ -29,21 +29,14 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      // setLoading(false);
+      setNotes([]);
+      return;
+    }
     const fetchNotes = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.warn("No token found");
-        setError(true);
-        setLoading(false);
-        return;
-      }
-
       try {
-        const response = await axios.get(`${BACKEND_URL}/notes`, {
-          headers: { Authorization: token },
-        });
-
+        const response = await axios.get(`${BACKEND_URL}/notes`, { withCredentials: true });
         if (response.data?.data?.length > 0) {
           setNotes(response.data.data);
         } else {

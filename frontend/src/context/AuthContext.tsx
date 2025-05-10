@@ -1,24 +1,24 @@
+import { BACKEND_URL } from "@/config";
 import { UserProp } from "@/types/schema";
+import axios from "axios";
 import { createContext, JSX, useContext, useState } from "react";
 
 interface AuthContextType {
     user: UserProp | null;
-    login: (userData: UserProp) => void;
+    login: () => Promise<void>;
     logout: () => void;
 }
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: JSX.Element }) => {
-    const [user, setUser] = useState<UserProp | null>(() => {
-        return localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") as string) : null;
-    });
+    const [user, setUser] = useState<UserProp | null>(null);
 
-    const login = (userData: UserProp) => {
-        setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
+    const login = async () => {
+        const res = await axios.post(`${BACKEND_URL}/me`, {}, { withCredentials: true, })
+        console.log(res.data)
+        setUser(res.data);
     };
     const logout = () => {
         setUser(null);
-        localStorage.removeItem("user");
     };
 
     return (

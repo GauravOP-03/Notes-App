@@ -40,7 +40,7 @@ export default function AllNotes({ onDelete, onSave }: AllNotesProps) {
   const navigate = useNavigate();
   function logout() {
     localStorage.removeItem("token");
-    localStorage.removeItem("userId");
+    localStorage.removeItem("user");
     navigate("/login");
   }
 

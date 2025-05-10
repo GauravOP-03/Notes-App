@@ -82,8 +82,8 @@ const AddNotes = () => {
         .post(`${BACKEND_URL}/notes`, data, {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: localStorage.getItem("token"),
           },
+          withCredentials: true,
         })
         .then((res) => {
           console.log("Success:", res.data);

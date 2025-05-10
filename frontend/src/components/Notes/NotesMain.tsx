@@ -20,11 +20,8 @@ export default function NotesMain() {
   async function onDelete(id: string) {
     console.log(id);
     try {
-      const token = localStorage.getItem("token");
       const data = await axios.delete(`${BACKEND_URL}/notes/${id}/delete`, {
-        headers: {
-          Authorization: token,
-        },
+        withCredentials: true,
       })
       console.log(data);
       // window.location.reload();
@@ -45,16 +42,14 @@ export default function NotesMain() {
       console.error("Note ID is missing.");
       return;
     }
-
-    const token = localStorage.getItem("token");
     try {
 
 
       const response = await axios.put(`${BACKEND_URL}/notes/${id}`, editedData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: token,
         },
+        withCredentials: true,
       })
       if (response.data) {
         console.log("Response data:", response.data.data);

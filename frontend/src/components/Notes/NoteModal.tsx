@@ -113,7 +113,7 @@ export const NoteModal = ({
   const markAudioForDeletion = () => {
     setEditedNote(prev => ({ ...prev, audioFile: null }));
     setDeleteAudio(true);
-    console.log("maked audio")
+    // console.log("maked audio")
   };
 
 
@@ -193,7 +193,7 @@ export const NoteModal = ({
           )}
 
           {/* Transcribed Text Section */}
-          {editedNote.transcribedText !== "null" && (
+          {editedNote.transcribedText && editedNote.transcribedText !== "null" && (
             <div className="p-4 bg-gray-100 rounded-lg">
               <p className="font-semibold text-gray-800 mb-2">
                 Transcribed Text:

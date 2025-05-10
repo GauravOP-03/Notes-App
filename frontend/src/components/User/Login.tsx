@@ -11,6 +11,7 @@ import { BACKEND_URL } from "@/config";
 import { useAuth } from "@/context/AuthContext";
 import { loginUserSchema } from "@/types/schema";
 import { ZodError } from "zod";
+import GoogleLogin from "./GoogleLogin";
 export default function LoginForm() {
   const [formData, setFormData] = useState({
     email: "",
@@ -47,11 +48,10 @@ export default function LoginForm() {
         password: formData.password,
       });
       setLoading(true);
-      const res = await axios.post(`${BACKEND_URL}/login`, { email: formData.email, password: formData.password })
-      const { token, userData } = res.data;
-      console.log(userData);
-      localStorage.setItem("token", token);
-      login(userData);
+      await axios.post(`${BACKEND_URL}/login`, { email: formData.email, password: formData.password }, { withCredentials: true })
+
+
+      await login();
 
       navigate("/notes");
       toast({
@@ -72,8 +72,8 @@ export default function LoginForm() {
         console.error(e);
         toast({
           description: axios.isAxiosError(e) && e.response?.data?.message
-          ? e.response.data.message
-          : "Login failed. Please try again.",
+            ? e.response.data.message
+            : "Login failed. Please try again.",
         });
       }
     } finally {
@@ -135,6 +135,7 @@ export default function LoginForm() {
             </a>
           </p>
         </CardContent>
+        <GoogleLogin />
       </Card>
     </div>
   );
