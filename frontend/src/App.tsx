@@ -15,9 +15,8 @@ function App() {
     {
       path: "/",
       element: (
-        <PrivateRoute>
-          <MainPage />
-        </PrivateRoute>
+        <MainPage />
+
       ),
     },
     { path: "/notes", element: <NotesPage /> },

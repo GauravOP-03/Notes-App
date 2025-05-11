@@ -5,7 +5,8 @@ interface PrivateRouteProps {
     children: React.ReactNode;
 }
 const PrivateRoute = ({ children }: PrivateRouteProps) => {
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
+    if (loading) return <div>Loading...</div>; // or a spinner
     return user ? children : <Navigate to="/login" />;
 };
 

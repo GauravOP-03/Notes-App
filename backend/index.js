@@ -50,10 +50,18 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", (roomId) => {
     socket.roomId = roomId;
     socket.join(roomId);
+    // console.log(roomId)
   });
-  socket.on("sendWord", (word) => {
-    socket.to(socket.roomId).emit("receiveWord", word);
+  socket.on("updateText", (word) => {
+    socket.to(socket.roomId).emit("updateText", word);
     // console.log(roomId);
+  });
+  socket.on("updateCursor", ({ userId, position, username }) => {
+    socket
+      .to(socket.roomId)
+      .emit("cursorPosition", { userId, position, username });
+    // console.log(socket.roomId);
+    // console.log(position);
   });
 
   socket.on("disconnect", () => {

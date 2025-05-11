@@ -1,78 +1,142 @@
-import { useState, useEffect } from "react";
-import io, { Socket } from "socket.io-client";
+import { useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { useParams } from "react-router-dom";
-import { Button } from "../components/ui/button";
-import { Share } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Save, Share2, Loader2 } from "lucide-react";
+import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
+import { useCollaborativeSocket } from "@/hooks/useCollaborativeSocket";
+import { CursorOverlay } from "@/components/CursorOverlay";
+import { BACKEND_URL } from "@/config";
+import { useNotes } from "@/context/NotesContext";
 
-export default function RealTimeTextUI() {
-  const [text, setText] = useState("");
-  const [receivedText, setReceivedText] = useState("");
-
+export default function RealTimeTextEditor() {
   const { id } = useParams();
+  const { user } = useAuth();
+  const { setNotes } = useNotes();
+  const userId = user?._id || "";
+  const username = user?.username || "Anonymous";
 
-  const [socket, setSocket] = useState<Socket | null>(null); // Track the socket instance
+  const [title, setTitle] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  useEffect(() => {
-    const socketInstance = io("http://localhost:3000");
-    setSocket(socketInstance);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    // Listen for incoming words
-    socketInstance.emit("joinRoom", id);
+  const {
+    text,
+    setText,
+    cursors,
+    emitTextUpdate,
+    emitCursorUpdate,
+  } = useCollaborativeSocket(id || "", userId, username);
 
-    socketInstance.on("receiveWord", (word) => {
-      setReceivedText(word);
-    });
-
-    return () => {
-      socketInstance.disconnect(); // Cleanup on unmount
-    };
-  }, [id]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
     setText(newText);
-    if (socket) {
-      socket.emit("sendWord", newText);
+    emitTextUpdate(newText);
+    emitCursorUpdate(e.target.selectionStart);
+  };
+
+  const handleCursorMove = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    emitCursorUpdate(e.target.selectionStart);
+  };
+
+  const handleSaveNote = async () => {
+    if (!text.trim() || !title.trim()) {
+      setMessage({ type: "error", text: "Please provide a title and some content." });
+      return;
+    }
+    setSaving(true);
+    setMessage(null);
+    try {
+      const res = await axios.post(`${BACKEND_URL}/notes`, {
+        heading: title,
+        noteBody: text,
+        image: [],
+        audioFile: null,
+      }, { withCredentials: true });
+      setNotes((prevNotes) => [...prevNotes, res.data.data]);
+      setMessage({ type: "success", text: "Note saved successfully!" });
+    } catch (error) {
+      setMessage({ type: "error", text: "Failed to save note" });
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleCopyLink = async () => {
     try {
-      // Copy the current URL to the clipboard
       await navigator.clipboard.writeText(window.location.href);
-      // Optionally, provide user feedback
-      alert("Link copied to clipboard!");
+      setMessage({ type: "success", text: "Share link copied to clipboard!" });
     } catch (error) {
-      console.error("Failed to copy the link: ", error);
+      setMessage({ type: "error", text: "Copy failed" });
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 p-4">
-      <Card className="w-full max-w-md p-4 shadow-lg">
-        <CardContent className="space-y-4">
-          <h2 className="text-xl font-semibold">Real-time Word Sharing</h2>
-          <Textarea
-            placeholder="Type something..."
-            value={text}
-            onChange={handleChange}
-            className="w-full h-40"
-          />
-          <div className="p-2 bg-gray-200 rounded-lg min-h-[100px]">
-            {receivedText || "Shared words will appear here..."}
+    <div className="flex flex-col items-center justify-center p-4 min-h-screen bg-muted">
+      <Card className="w-full max-w-3xl shadow-xl border rounded-2xl">
+        <CardContent className="p-6 space-y-5 relative">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-semibold tracking-tight">
+              Collaborative Note Editing
+            </h2>
+            <Input
+              placeholder="Title your shared note..."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="text-lg"
+              disabled={saving}
+            />
+          </div>
+
+          <div className="relative">
+            <Textarea
+              ref={textareaRef}
+              value={text}
+              onChange={handleTextChange}
+              onSelect={handleCursorMove}
+              placeholder="Type collaboratively with others..."
+              className="h-64 text-base"
+              disabled={saving}
+            />
+            <CursorOverlay
+              cursors={cursors}
+              textareaRef={textareaRef as React.RefObject<HTMLTextAreaElement>}
+              currentUserId={userId}
+            />
+          </div>
+
+          {message && (
+            <div
+              className={`text-sm px-3 py-2 rounded ${message.type === "success"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+                }`}
+            >
+              {message.text}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={handleCopyLink}
+              disabled={saving}
+            >
+              <Share2 size={18} />
+              Share
+            </Button>
+            <Button className="gap-2" onClick={handleSaveNote} disabled={saving}>
+              {saving ? <Loader2 className="animate-spin w-4 h-4" /> : <Save size={18} />}
+              {saving ? "Saving..." : "Save Note"}
+            </Button>
           </div>
         </CardContent>
-
-        <Button
-          onClick={handleCopyLink}
-          className="text-sm font-medium  shadow-2xl bg-white/95 backdrop-blur-lg 
-      hover:scale-110 hover:text-white/95 transition-all border border-gray-400 text-gray-900"
-        >
-          <Share size={24} />
-          <span>Share</span>
-        </Button>
       </Card>
     </div>
   );
