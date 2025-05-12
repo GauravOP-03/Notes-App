@@ -47,21 +47,27 @@ app.use("/api/notes", require("./routes/notes"));
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
-  socket.on("joinRoom", (roomId) => {
+  socket.on("joinRoom", ({ roomId, username, uid }) => {
     socket.roomId = roomId;
     socket.join(roomId);
+    // console.log(username, userId);
+    io.to(roomId).emit("userJoined", { username, uid });
     // console.log(roomId)
   });
+
   socket.on("updateText", (word) => {
     socket.to(socket.roomId).emit("updateText", word);
     // console.log(roomId);
   });
+
   socket.on("updateCursor", ({ userId, position, username }) => {
     socket
       .to(socket.roomId)
       .emit("cursorPosition", { userId, position, username });
-    // console.log(socket.roomId);
-    // console.log(position);
+  });
+
+  socket.on("chatMessage", ({ message, username, uid }) => {
+    io.to(socket.roomId).emit("chatMessage", { message, username, uid });
   });
 
   socket.on("disconnect", () => {

@@ -11,6 +11,8 @@ import { useCollaborativeSocket } from "@/hooks/useCollaborativeSocket";
 import { CursorOverlay } from "@/components/CursorOverlay";
 import { BACKEND_URL } from "@/config";
 import { useNotes } from "@/context/NotesContext";
+import { ChatArea } from "@/components/ChatArea";
+import Navbar from "@/components/layout/Navbar";
 
 export default function RealTimeTextEditor() {
   const { id } = useParams();
@@ -31,6 +33,9 @@ export default function RealTimeTextEditor() {
     cursors,
     emitTextUpdate,
     emitCursorUpdate,
+    allUser,
+    emitMessageUpdate,
+    messages
   } = useCollaborativeSocket(id || "", userId, username);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -61,6 +66,7 @@ export default function RealTimeTextEditor() {
       setNotes((prevNotes) => [...prevNotes, res.data.data]);
       setMessage({ type: "success", text: "Note saved successfully!" });
     } catch (error) {
+      console.error(error)
       setMessage({ type: "error", text: "Failed to save note" });
     } finally {
       setSaving(false);
@@ -72,72 +78,98 @@ export default function RealTimeTextEditor() {
       await navigator.clipboard.writeText(window.location.href);
       setMessage({ type: "success", text: "Share link copied to clipboard!" });
     } catch (error) {
+      console.error(error)
       setMessage({ type: "error", text: "Copy failed" });
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 min-h-screen bg-muted">
-      <Card className="w-full max-w-3xl shadow-xl border rounded-2xl">
-        <CardContent className="p-6 space-y-5 relative">
-          <div className="space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight">
-              Collaborative Note Editing
-            </h2>
-            <Input
-              placeholder="Title your shared note..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="text-lg"
-              disabled={saving}
-            />
+    <>
+      <Navbar />
+      <div className="flex flex-col items-center justify-center p-4 min-h-screen bg-muted">
+        <Card className="w-full max-w-3xl shadow-xl border rounded-2xl">
+          <div>
+            {allUser.map(({ uid, username }) => (
+              <div key={uid}>
+                {/* Label bubble */}
+                <div
+                  className="absolute z-50 bg-blue-600 text-white text-xs px-2 py-0.5 rounded shadow pointer-events-none animate-fadeIn"
+                  style={{
+                    top: "10px",
+                    left: "10px",
+                    transform: "translateY(-100%)", // Position label above caret
+                  }}
+                >
+                  {uid === userId ? "You" : username}
+                </div>
+              </div>
+            ))}
           </div>
+          <CardContent className="p-6 space-y-5 relative">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold tracking-tight">
+                Collaborative Note Editing
+              </h2>
+              <Input
+                placeholder="Title your shared note..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="text-lg"
+                disabled={saving}
+              />
+            </div>
 
-          <div className="relative">
-            <Textarea
-              ref={textareaRef}
-              value={text}
-              onChange={handleTextChange}
-              onSelect={handleCursorMove}
-              placeholder="Type collaboratively with others..."
-              className="h-64 text-base"
-              disabled={saving}
-            />
-            <CursorOverlay
-              cursors={cursors}
-              textareaRef={textareaRef as React.RefObject<HTMLTextAreaElement>}
-              currentUserId={userId}
-            />
-          </div>
+            <div className="relative">
+              <Textarea
+                ref={textareaRef}
+                value={text}
+                onChange={handleTextChange}
+                onSelect={handleCursorMove}
+                placeholder="Type collaboratively with others..."
+                className="h-64 text-base"
+                disabled={saving}
+              />
+              <CursorOverlay
+                cursors={cursors}
+                textareaRef={textareaRef as React.RefObject<HTMLTextAreaElement>}
+                currentUserId={userId}
+              />
+            </div>
 
-          {message && (
-            <div
-              className={`text-sm px-3 py-2 rounded ${message.type === "success"
+            <div className="mt-6 border-t pt-4">
+              <h3 className="text-lg font-medium mb-2">Chat</h3>
+              <ChatArea username={username} emitMessageUpdate={emitMessageUpdate} messages={messages} />
+            </div>
+
+            {message && (
+              <div
+                className={`text-sm px-3 py-2 rounded ${message.type === "success"
                   ? "bg-green-100 text-green-700"
                   : "bg-red-100 text-red-700"
-                }`}
-            >
-              {message.text}
-            </div>
-          )}
+                  }`}
+              >
+                {message.text}
+              </div>
+            )}
 
-          <div className="flex justify-end gap-3 pt-2">
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={handleCopyLink}
-              disabled={saving}
-            >
-              <Share2 size={18} />
-              Share
-            </Button>
-            <Button className="gap-2" onClick={handleSaveNote} disabled={saving}>
-              {saving ? <Loader2 className="animate-spin w-4 h-4" /> : <Save size={18} />}
-              {saving ? "Saving..." : "Save Note"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={handleCopyLink}
+                disabled={saving}
+              >
+                <Share2 size={18} />
+                Share
+              </Button>
+              <Button className="gap-2" onClick={handleSaveNote} disabled={saving}>
+                {saving ? <Loader2 className="animate-spin w-4 h-4" /> : <Save size={18} />}
+                {saving ? "Saving..." : "Save Note"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }
