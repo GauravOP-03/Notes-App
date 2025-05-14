@@ -24,7 +24,7 @@ router.post("/", verifyToken, uploadFields, async (req, res) => {
     const audioFile = req.files?.audioFile?.[0]?.path || null;
 
     const newNote = new note({
-      date: new Date(),
+      // date: new Date(),
       heading: heading,
       noteBody: noteBody,
       image: [imagePath],
@@ -93,7 +93,7 @@ router.put("/:id", verifyToken, upload.single("file"), async (req, res) => {
     const updatedNote = await note.findByIdAndUpdate(
       id,
       {
-        date: new Date(),
+        // date: new Date(),
         heading,
         noteBody,
         audioFile,

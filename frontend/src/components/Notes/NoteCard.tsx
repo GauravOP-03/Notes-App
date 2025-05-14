@@ -18,13 +18,25 @@ export default function NoteCard({ note, onDelete, onClick }: Props) {
             onClick={onClick}
         >
             <CardHeader className="flex flex-col gap-2">
-                <p className="text-xs text-gray-400">
-                    {new Date(note.date).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                    })}
-                </p>
+                <div className="flex justify-between">
+
+                    <p className="text-xs text-gray-400">
+                        created At -
+                        {new Date(note.createdAt).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                        })}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                        updated At -
+                        {new Date(note.updatedAt).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                        })}
+                    </p>
+                </div>
                 <h3 className="text-lg font-semibold leading-tight line-clamp-1">
                     {note.heading}
                 </h3>

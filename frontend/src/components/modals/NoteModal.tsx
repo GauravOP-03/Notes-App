@@ -159,16 +159,31 @@ export const NoteModal = ({
               placeholder="Note Heading..."
               className="w-full text-3xl font-semibold text-gray-800 bg-transparent border-none outline-none placeholder-gray-400"
             />
-            <p className="text-xs text-gray-500">
-              {new Date(editedNote.date).toLocaleString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              })}
-            </p>
+            <div className="flex justify-between">
+
+              {/* <p className="text-xs text-gray-500">
+                Created At-
+                {new Date(editedNote.createdAt).toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
+              </p> */}
+              <p className="text-xs text-gray-500">
+
+                {new Date(editedNote.updatedAt).toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
+              </p>
+            </div>
           </div>
 
           {/* Modal Body */}

@@ -7,8 +7,6 @@ interface ChatMsg {
     message: string;
 }
 interface ChatAreaProps {
-    roomId: string;
-    userId: string;
     username: string;
     messages: ChatMsg[];
     emitMessageUpdate: (message: string) => void;

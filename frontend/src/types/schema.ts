@@ -46,7 +46,8 @@ export const registerUserSchema = z.object({
 export interface Note {
   file?: File | null;
   _id: string;
-  date: string;
+  createdAt: string;
+  updatedAt: string;
   heading: string;
   noteBody: string;
   image: string[];

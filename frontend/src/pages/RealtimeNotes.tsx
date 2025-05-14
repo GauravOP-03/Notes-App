@@ -35,14 +35,24 @@ export default function RealTimeTextEditor() {
     emitCursorUpdate,
     allUser,
     emitMessageUpdate,
-    messages
+    messages,
+    typingStatus,
+    typingUsers,
+    lockNotes,
+    locked,
+    host,
+    error
+
   } = useCollaborativeSocket(id || "", userId, username);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
     setText(newText);
+    typingStatus();
     emitTextUpdate(newText);
     emitCursorUpdate(e.target.selectionStart);
+    console.log(allUser)
+    console.log(locked)
   };
 
   const handleCursorMove = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -88,23 +98,7 @@ export default function RealTimeTextEditor() {
       <Navbar />
       <div className="flex flex-col items-center justify-center p-4 min-h-screen bg-muted">
         <Card className="w-full max-w-3xl shadow-xl border rounded-2xl">
-          <div>
-            {allUser.map(({ uid, username }) => (
-              <div key={uid}>
-                {/* Label bubble */}
-                <div
-                  className="absolute z-50 bg-blue-600 text-white text-xs px-2 py-0.5 rounded shadow pointer-events-none animate-fadeIn"
-                  style={{
-                    top: "10px",
-                    left: "10px",
-                    transform: "translateY(-100%)", // Position label above caret
-                  }}
-                >
-                  {uid === userId ? "You" : username}
-                </div>
-              </div>
-            ))}
-          </div>
+
           <CardContent className="p-6 space-y-5 relative">
             <div className="space-y-2">
               <h2 className="text-2xl font-semibold tracking-tight">
@@ -127,7 +121,7 @@ export default function RealTimeTextEditor() {
                 onSelect={handleCursorMove}
                 placeholder="Type collaboratively with others..."
                 className="h-64 text-base"
-                disabled={saving}
+                disabled={(host !== userId && locked) || saving}
               />
               <CursorOverlay
                 cursors={cursors}
@@ -135,6 +129,12 @@ export default function RealTimeTextEditor() {
                 currentUserId={userId}
               />
             </div>
+
+            {error && (
+              <div className="text-sm px-3 py-2 rounded bg-red-100 text-red-700 mb-2">
+                {error}
+              </div>
+            )}
 
             <div className="mt-6 border-t pt-4">
               <h3 className="text-lg font-medium mb-2">Chat</h3>
@@ -166,6 +166,39 @@ export default function RealTimeTextEditor() {
                 {saving ? <Loader2 className="animate-spin w-4 h-4" /> : <Save size={18} />}
                 {saving ? "Saving..." : "Save Note"}
               </Button>
+              {host === userId && (
+                <Button
+                  variant={locked ? "default" : "destructive"}
+                  className="gap-2"
+                  onClick={lockNotes}
+                >
+                  {locked ? "Unlock" : "Lock"}
+                </Button>
+              )}
+            </div>
+
+            <div>
+              {allUser.map(({ uid, username }) => (
+                <div key={uid}>
+                  {/* Label bubble */}
+                  <div
+                    className="absolute z-50 bg-blue-600 text-white text-xs px-2 py-0.5 rounded shadow pointer-events-none animate-fadeIn"
+                    style={{
+                      top: "10px",
+                      left: "10px",
+                      transform: "translateY(-100%)", // Position label above caret
+                    }}
+                  >
+                    {uid === userId ? "You" : username}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div>
+              {typingUsers.map(({ uid, username }) => (
+                <p key={uid + username} className='text-sm italic text-gray-500'>{username} is typing</p>
+              ))}
             </div>
           </CardContent>
         </Card>
