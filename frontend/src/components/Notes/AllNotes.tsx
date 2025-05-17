@@ -16,27 +16,51 @@ interface AllNotesProps {
   onDelete: (id: string) => Promise<void>;
   onSave: (updatedNote: Note) => Promise<void>;
   onShare: (noteId: string) => Promise<void>;
+  summarize: (id: string) => Promise<void>;
 }
 
-export default function AllNotes({ onDelete, onSave, onShare }: AllNotesProps) {
+export default function AllNotes({ onDelete, onSave, onShare, summarize }: AllNotesProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sortField, setSortField] = useState("updated");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const { notes, loading } = useNotes();
   const { user } = useAuth();
 
   const filteredNotes = useMemo(() => {
-    return notes.filter(
+    // Filter
+    const filtered = notes.filter(
       (note) =>
         note.heading.toLowerCase().includes(searchQuery.toLowerCase()) ||
         note.noteBody.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [notes, searchQuery]);
+    // Sort
+    filtered.sort((a, b) => {
+      let aValue: string | number = "";
+      let bValue: string | number = "";
+      if (sortField === "title") {
+        aValue = a.heading.toLowerCase();
+        bValue = b.heading.toLowerCase();
+      } else if (sortField === "created") {
+        aValue = new Date(a.createdAt).getTime();
+        bValue = new Date(b.createdAt).getTime();
+      } else if (sortField === "updated") {
+        aValue = new Date(a.updatedAt).getTime();
+        bValue = new Date(b.updatedAt).getTime();
+      }
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+    return filtered;
+  }, [notes, searchQuery, sortField, sortOrder]);
 
   const handleCardClick = (note: Note) => {
     setSelectedNote(note);
     setIsModalOpen(true);
+    console.log(note)
   };
 
   const closeModal = () => {
@@ -48,16 +72,24 @@ export default function AllNotes({ onDelete, onSave, onShare }: AllNotesProps) {
     setSearchQuery(query);
   }
 
+
+
   return (
     <div className="relative flex flex-col min-h-screen bg-gradient-to-tr from-pink-50 via-purple-50 to-indigo-50 text-gray-800">
       <Navbar />
 
       {notes.length > 0 && (
         <section className="max-w-6xl mx-auto w-full px-6 mt-10 mb-8">
-          <NotesSearchSort searchQuery={searchQuery} setSearchQuery={handleSearchQuery} />
+          <NotesSearchSort
+            searchQuery={searchQuery}
+            setSearchQuery={handleSearchQuery}
+            sortField={sortField}
+            setSortField={setSortField}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
         </section>
       )}
-
 
       <main className="flex-1 px-6 pb-20">
         {/* <Toaster /> */}
@@ -93,6 +125,7 @@ export default function AllNotes({ onDelete, onSave, onShare }: AllNotesProps) {
         onClose={closeModal}
         note={selectedNote}
         onSave={onSave}
+        summarize={summarize}
       />
     </div>
   );

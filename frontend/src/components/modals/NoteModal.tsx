@@ -12,6 +12,7 @@ interface NoteModalProps {
   onClose: () => void;
   note: Note | null;
   onSave: (updatedNote: Note) => Promise<void>; // Function to save changes
+  summarize: (id: string) => Promise<void>;
   //  // Loading state
 }
 
@@ -19,7 +20,8 @@ export const NoteModal = ({
   isOpen,
   onClose,
   note,
-  onSave
+  onSave,
+  summarize
 }: NoteModalProps) => {
 
   if (!note || !isOpen) return null;
@@ -29,6 +31,7 @@ export const NoteModal = ({
   const [editedNote, setEditedNote] = useState<Note>(note);
   // console.log("edited note:", editedNote)
   const [loading, setLoading] = useState(false)
+  const [summarizing, setSummarizing] = useState(false);
 
   // Handle input changes
   const handleChange = (
@@ -102,6 +105,15 @@ export const NoteModal = ({
   //     console.log(e)
   //   }
   // }
+
+  async function summarizeText(id: string) {
+    setSummarizing(true);
+    try {
+      await summarize(id);
+    } finally {
+      setSummarizing(false);
+    }
+  }
   const markImageForDeletion = (img: string) => {
     setEditedNote(prev => ({
       ...prev,
@@ -136,172 +148,191 @@ export const NoteModal = ({
 
   return (
     <>
-      {/* Dimmed background */}
+      {/* Dimmed Background */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
         onClick={onClose}
       />
 
-      {/* Modal container */}
+      {/* Modal */}
       <div
-        className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-11/12 sm:w-8/12 md:w-6/12 lg:w-5/12 max-h-[90vh] overflow-y-auto z-50 bg-white rounded-xl shadow-2xl transition-all duration-300 ${isOpen ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? "opacity-100 scale-100" : "opacity-0 scale-95"
           }`}
       >
-        {/* Modal content */}
-        <div className="p-8 space-y-6">
-          {/* Modal Header */}
-          <div className="space-y-1">
+        <div className="w-full max-w-5xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+
+          {/* Sticky Header */}
+          <div className="border-b px-6 py-4 bg-white sticky top-0 z-10 shadow-sm">
             <input
               type="text"
               name="heading"
               value={editedNote.heading}
               onChange={handleChange}
-              placeholder="Note Heading..."
-              className="w-full text-3xl font-semibold text-gray-800 bg-transparent border-none outline-none placeholder-gray-400"
+              placeholder="Note Title..."
+              className="w-full text-3xl font-semibold tracking-tight text-gray-900 bg-transparent outline-none placeholder-gray-400"
             />
-            <div className="flex justify-between">
-
-              {/* <p className="text-xs text-gray-500">
-                Created At-
-                {new Date(editedNote.createdAt).toLocaleString("en-US", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                })}
-              </p> */}
-              <p className="text-xs text-gray-500">
-
-                {new Date(editedNote.updatedAt).toLocaleString("en-US", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                })}
-              </p>
-            </div>
+            <p className="text-xs text-gray-500 mt-1 italic">
+              Last edited:{" "}
+              {new Date(editedNote.updatedAt).toLocaleString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            </p>
           </div>
 
-          {/* Modal Body */}
-          <textarea
-            name="noteBody"
-            value={editedNote.noteBody}
-            onChange={handleChange}
-            placeholder="Write your note here..."
-            className="w-full h-40 p-4 border rounded-lg text-gray-700 text-base resize-none focus:ring-2 focus:ring-gray-300 focus:outline-none"
-          />
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 bg-gray-50 scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 scrollbar-track-transparent">
 
-          {/* Voice Section */}
-          {editedNote.audioFile && !deleteAudio && (
-            <div className="space-y-2">
-              <p className="font-semibold text-gray-800">Audio:</p>
-              <audio controls className="w-full">
-                <source src={editedNote.audioFile} type="audio/wav" />
-                Your browser does not support the audio element.
-              </audio>
-              <Button onClick={editedNote.audioFile ? markAudioForDeletion : undefined}>Delete</Button>
+            {/* Note Text */}
+            <div className="lg:col-span-2">
+              <label className="text-sm font-semibold text-gray-700 block mb-2">
+                Note Body
+              </label>
+              <textarea
+                name="noteBody"
+                value={editedNote.noteBody}
+                onChange={handleChange}
+                placeholder="Write your note here..."
+                className="w-full h-[300px] lg:h-[500px] p-4 bg-white rounded-lg border border-gray-300 text-gray-800 text-base resize-none focus:ring-2 focus:ring-gray-400 focus:outline-none leading-relaxed tracking-wide shadow-sm"
+              />
             </div>
-          )}
 
-          {/* Transcribed Text Section */}
-          {editedNote.transcribedText && editedNote.transcribedText !== "null" && (
-            <div className="p-4 bg-gray-100 rounded-lg">
-              <p className="font-semibold text-gray-800 mb-2">
-                Transcribed Text:
-              </p>
-              <textarea className="w-full h-40 p-4 border rounded-lg text-gray-700 text-base resize-none focus:ring-2 focus:ring-gray-300 focus:outline-none" value={editedNote.transcribedText} onChange={handleChange} name="transcribedText" placeholder="write null to delete permanently.."></textarea>
-            </div>
-          )}
+            {/* Sidebar */}
+            <div className="space-y-4">
 
-          {/* Images Section */}
-          {editedNote.image &&
-            editedNote.image.length > 0 &&
-            editedNote.image.filter(Boolean).length > 0 && (
-              <div className="space-y-3">
-                <p className="font-semibold text-gray-800">Images:</p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {editedNote.image.map(
-                    (img, idx) =>
-                      img && (
-                        <div
-                          key={idx}
-                          className={`relative rounded-xl overflow-hidden shadow-lg group aspect-[4/3] border-2 ${imagesToDelete.includes(img)
-                            ? "border-red-500 opacity-60"
-                            : "border-transparent"
-                            }`}
+              {/* AI Summary */}
+              {editedNote.aiData?.summary && (
+                <div className="bg-white rounded-xl p-4 border-l-4 border-blue-500 shadow-sm">
+                  <p className="text-sm font-semibold text-gray-700 mb-2">
+                    AI Summary
+                  </p>
+                  <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
+                    {editedNote.aiData.summary}
+                  </p>
+                  {editedNote.aiData.tags && editedNote.aiData.tags?.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {editedNote.aiData.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded-full"
                         >
-                          <a
-                            href={img}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block w-full h-full"
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Transcription */}
+              {editedNote.transcribedText && editedNote.transcribedText !== "null" && (
+                <div className="bg-white p-4 rounded-xl border-l-4 border-green-500 shadow-sm space-y-2">
+                  <p className="text-sm font-semibold text-gray-700">Transcription</p>
+                  <textarea
+                    name="transcribedText"
+                    value={editedNote.transcribedText}
+                    onChange={handleChange}
+                    placeholder="Write 'null' to delete..."
+                    className="w-full h-32 p-3 border rounded-md text-sm text-gray-700 resize-none focus:ring-2 focus:ring-gray-300"
+                  />
+                </div>
+              )}
+
+              {/* Audio */}
+              {editedNote.audioFile && !deleteAudio && (
+                <div className="bg-white p-4 rounded-xl border shadow-sm space-y-2">
+                  <p className="text-sm font-semibold text-gray-700">Audio</p>
+                  <audio controls className="w-full rounded">
+                    <source src={editedNote.audioFile} type="audio/wav" />
+                    Your browser does not support the audio element.
+                  </audio>
+                  <Button onClick={markAudioForDeletion}>Delete Audio</Button>
+                </div>
+              )}
+
+              {/* Images */}
+              {editedNote.image?.filter(Boolean).length > 0 && (
+                <div className="bg-white p-4 rounded-xl border shadow-sm">
+                  <p className="text-sm font-semibold text-gray-700 mb-2">Images</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    {editedNote.image.map(
+                      (img, idx) =>
+                        img && (
+                          <div
+                            key={idx}
+                            className={`relative rounded-xl overflow-hidden group aspect-[4/3] border transition-all duration-300 ${imagesToDelete.includes(img)
+                              ? "border-red-500 opacity-60"
+                              : "border-gray-200 hover:shadow-lg"
+                              }`}
                           >
                             <img
                               src={img}
-                              alt={`Image ${idx}`}
-                              className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105`}
+                              alt={`Note image ${idx}`}
+                              className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
                             />
-                          </a>
-                          {/* Overlay for deleted images */}
-                          {imagesToDelete.includes(img) && (
-                            <div className="absolute inset-0 bg-red-500 bg-opacity-40 flex items-center justify-center text-white text-sm font-semibold pointer-events-none">
-                              Marked for Deletion
-                            </div>
-                          )}
-                          {/* Delete Button */}
-                          <button
-                            onClick={() => markImageForDeletion(img)}
-                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            title="Delete Image"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      )
-                  )}
+                            {imagesToDelete.includes(img) && (
+                              <div className="absolute inset-0 bg-red-500 bg-opacity-40 flex items-center justify-center text-white text-sm font-bold">
+                                Marked
+                              </div>
+                            )}
+                            <button
+                              onClick={() => markImageForDeletion(img)}
+                              title="Mark for deletion"
+                              className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-md"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        )
+                    )}
+                  </div>
                 </div>
+              )}
+
+              {/* Upload */}
+              <div>
+                <label className="block font-semibold text-gray-800 mb-2">
+                  Upload Image
+                </label>
+                <input
+                  type="file"
+                  name="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="w-full text-sm text-gray-700 border rounded-lg p-2"
+                />
               </div>
-            )}
-
-
-          {/* Upload Section */}
-          <div>
-            <label className="block font-semibold text-gray-800 mb-2">
-              Upload File:
-            </label>
-            <input
-              type="file"
-              name="file"
-              accept="image/png, image/jpeg, image/jpg"
-              onChange={handleFileChange}
-              className="block w-full text-sm text-gray-700 p-2 border rounded-lg cursor-pointer"
-            />
+            </div>
           </div>
 
-          {/* Footer Actions */}
-          <div className="flex justify-end items-center gap-4 pt-4 border-t">
-            <Button
-              variant="outline"
-              className="px-6 py-2 transition hover:bg-gray-100"
-              onClick={onClose}
-            >
+          {/* Sticky Footer */}
+          <div className="flex justify-end items-center gap-4 px-6 py-4 border-t border-gray-200 bg-white sticky bottom-0 shadow-sm z-10">
+            <Button variant="outline" onClick={onClose}>
               Close
             </Button>
             <Button
-              variant="default"
-              className="px-6 py-2 flex items-center gap-2 transition hover:bg-gray-800 hover:text-white"
+              onClick={() => summarizeText(editedNote?._id)}
+              disabled={summarizing}
+            >
+              {summarizing ? "Summarizing..." : "Summarize"}
+            </Button>
+            <Button
               onClick={handleSave}
               disabled={loading}
+              className="flex items-center gap-2"
             >
-              <Pencil className="h-4 w-4" /> {loading ? "Saving..." : "Save"}
+              <Pencil className="h-4 w-4" />
+              {loading ? "Saving..." : "Save"}
             </Button>
           </div>
         </div>
       </div>
     </>
+
+
   );
 };

@@ -43,6 +43,26 @@ export const registerUserSchema = z.object({
   confirmPassword: z.string().nonempty("Confirm Password is required"),
 });
 
+interface aiData {
+  createdAt: string;
+  updatedAt?: string;
+  summary?: string;
+  tags?: [
+    | "lecture"
+    | "assignment"
+    | "important"
+    | "exam"
+    | "project"
+    | "todo"
+    | "meeting"
+    | "idea"
+    | "code"
+    | "research"
+    | "summary"
+    | "quote"
+    | "personal"
+  ];
+}
 export interface Note {
   file?: File | null;
   _id: string;
@@ -56,6 +76,7 @@ export interface Note {
   shareId?: string;
   visibility: "public" | "private";
   sharedUntil?: string;
+  aiData?: aiData;
 }
 
 export interface UserProp {

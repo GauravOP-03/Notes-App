@@ -11,6 +11,7 @@ import { Note } from "@/types/schema";
 import { UserProp } from "@/types/schema";
 import { useAuth } from "./AuthContext";
 
+
 interface NotesContextType {
   notes: Note[];
   loading: boolean;
@@ -37,8 +38,10 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
     const fetchNotes = async () => {
       try {
         const response = await axios.get(`${BACKEND_URL}/notes`, { withCredentials: true });
+        // console.log(response)
         if (response.data?.data?.length > 0) {
           setNotes(response.data.data);
+          console.log(notes);
         } else {
           setNotes([]);
         }

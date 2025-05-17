@@ -61,6 +61,21 @@ const NotesController = () => {
         }
     }
 
+    async function summarize(id: string) {
+        const response = await axios.get(`${BACKEND_URL}/notes/${id}/summarize`, { withCredentials: true });
+        const { updatedAt, createdAt, summary } = response.data;
+        setNotes((prev) => {
+            const updatedNotes = prev.map((note) => {
+                if (note._id === id) {
+                    return { ...note, aiData: { ...note.aiData, updatedAt: updatedAt, createdAt: createdAt, summary: summary } };
+                }
+                return note;
+            });
+            return updatedNotes;
+        });
+        console.log(response.data.summary);
+    }
+
     // if (loading) return <NotesLoader />;
     // if (error) return <Error />;
     // if (!notes || notes.length === 0) return (<> <AddNotes /> <NotesEmpty /> </>);
@@ -68,7 +83,7 @@ const NotesController = () => {
     return (
         <>
             <AddNotes />
-            <AllNotes onDelete={onDelete} onSave={onSave} onShare={onShare} />
+            <AllNotes onDelete={onDelete} onSave={onSave} onShare={onShare} summarize={summarize} />
         </>
     );
 };

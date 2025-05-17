@@ -4,6 +4,7 @@ const { storage, cloudinary } = require("../cloudConfig");
 const upload = multer({ storage });
 const note = require("../models/notes");
 const verifyToken = require("./verifyToken");
+const noteAiData = require("../models/noteAiData");
 const router = express.Router();
 
 const uploadFields = upload.fields([
@@ -28,7 +29,7 @@ router.post("/", verifyToken, uploadFields, async (req, res) => {
       heading: heading,
       noteBody: noteBody,
       image: [imagePath],
-      owner: req.user.id,
+      owner: req.user.userId,
       transcribedText: transcribedText,
       audioFile: audioFile,
     });
@@ -47,10 +48,11 @@ router.post("/", verifyToken, uploadFields, async (req, res) => {
 
 router.get("/", verifyToken, async (req, res) => {
   try {
-    const id = req.user.id;
+    const id = req.user.userId;
     const data = await note
       .find({ owner: id })
-      .populate("owner", "email username");
+      .populate("aiData")
+      .select("-__v -owner");
     // console.log(data);
     res.status(200).json({ data });
   } catch (e) {
@@ -65,6 +67,17 @@ router.delete("/:id/delete", verifyToken, async (req, res) => {
     if (!id) {
       return res.status(404).json({ message: "Note not Found" });
     }
+
+    const noteToDelete = await note.findById(id).populate("owner").exec();
+    if (!noteToDelete) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+    if (noteToDelete.owner._id.toString() !== req.user.userId) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to delete this note" });
+    }
+
     await note.findByIdAndDelete(id);
     res.status(200).json({ message: "Deleted Successfully" });
   } catch (e) {
@@ -240,6 +253,79 @@ router.get("/shared/:shareId/", async (req, res) => {
   }
 
   return res.json({ message: "Fetched Notes successfully", sharedNotes });
+});
+
+router.get("/:id/summarize", verifyToken, async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+  try {
+    const { summarize } = require("../gemini/gemini");
+    const findNotes = await note.findById(id).populate("owner").exec();
+    if (!findNotes) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+    if (findNotes.owner._id.toString() !== req.user.userId) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to summarize this note" });
+    }
+    const noteContent = findNotes.noteBody;
+    const summary = await summarize(noteContent);
+    // console.log(summary);
+    const newSummary = new noteAiData({
+      summary,
+      noteId: id,
+    });
+    await newSummary.save();
+    res.status(200).json({
+      message: "Note summarized successfully",
+      summary: newSummary.summary,
+      createdAt: newSummary.updatedAt,
+      updatedAt: newSummary.createdAt,
+    });
+  } catch (e) {
+    console.error("Error summarizing note:", e.message);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: e.message });
+  }
+});
+
+router.get("/:id/tags", async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+  try {
+    const { tags } = require("../gemini/gemini");
+    const findNotes = await note.findById(id).populate("owner").exec();
+    if (!findNotes) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+    if (findNotes.owner._id.toString() !== req.user.userId) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to summarize this note" });
+    }
+    const noteContent = findNotes.noteBody;
+    const generatedTags = await tags(noteContent);
+    console.log(generatedTags);
+    // const newSummary = new noteAiData({
+    //   summary,
+    //   noteId: id,
+    // });
+    // await newSummary.save();
+    // res.status(200).json({
+    //   message: "Note summarized successfully",
+    //   summary: newSummary.summary,
+    //   createdAt:newSummary.updatedAt,
+    //   updatedAt:newSummary.createdAt,
+
+    // });
+  } catch (e) {
+    console.error("Error summarizing note:", e.message);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: e.message });
+  }
 });
 
 module.exports = router;
