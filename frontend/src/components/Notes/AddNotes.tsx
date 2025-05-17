@@ -8,9 +8,11 @@ import { useState } from "react";
 import VoiceRecorder from "./VoiceRecorder";
 import { BACKEND_URL } from "@/config";
 import { useNotes } from "@/context/NotesContext";
+import { useSetNoteTags } from "../utils/useSetNoteTags";
 const AddNotes = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { setNotes } = useNotes();
+  const setNoteTags = useSetNoteTags();
   const [voiceData, setVoiceData] = useState({
     transcribedText: "",
     audioFile: null as File | null,
@@ -94,6 +96,9 @@ const AddNotes = () => {
           setNotes((prevNotes) => [...prevNotes, res.data.data]);
           setError(null); // Clear error message
           // window.location.reload();
+          setTimeout(() => {
+            setNoteTags(res.data.data._id);
+          }, 4000);
         })
         .catch((error) => {
           setIsPending(false);
@@ -101,6 +106,9 @@ const AddNotes = () => {
           setError(error.message || "Failed to submit note.");
         });
     };
+
+
+
     handleData();
   };
 

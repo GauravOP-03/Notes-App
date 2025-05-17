@@ -60,7 +60,7 @@ export default function AllNotes({ onDelete, onSave, onShare, summarize }: AllNo
   const handleCardClick = (note: Note) => {
     setSelectedNote(note);
     setIsModalOpen(true);
-    console.log(note)
+    // console.log(note)
   };
 
   const closeModal = () => {
@@ -102,9 +102,13 @@ export default function AllNotes({ onDelete, onSave, onShare, summarize }: AllNo
             {filteredNotes.map((note, idx) => (
               <motion.div
                 key={note._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: idx * 0.05 }}
+
+                layout
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2, delay: idx * 0.05 }}
+                className="break-inside-avoid"
               >
                 <NoteCard
                   note={note}

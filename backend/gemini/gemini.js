@@ -30,8 +30,8 @@ async function tags(noteContent) {
       },
     ],
   });
-  const response = await result.response;
+  const response = result.response;
   //   console.log(response.text());
-  return response;
+  return response.text();
 }
 module.exports = { summarize, tags };

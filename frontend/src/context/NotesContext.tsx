@@ -41,7 +41,7 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
         // console.log(response)
         if (response.data?.data?.length > 0) {
           setNotes(response.data.data);
-          console.log(notes);
+          // console.log(notes);
         } else {
           setNotes([]);
         }

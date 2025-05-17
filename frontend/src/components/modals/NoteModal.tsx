@@ -63,15 +63,15 @@ export const NoteModal = ({
 
       for (const img of imagesToDelete) {
         await axios.delete(`${BACKEND_URL}/notes/${editedNote._id}/image`, {
-          headers: { Authorization: localStorage.getItem("token") },
-          data: { img }
+          data: { img },
+          withCredentials: true
         });
       }
 
       if (deleteAudio && note.audioFile) {
         await axios.delete(`${BACKEND_URL}/notes/${editedNote._id}/voice`, {
-          headers: { Authorization: localStorage.getItem("token") },
-          data: { voice: note.audioFile }
+          data: { voice: note.audioFile },
+          withCredentials: true
         });
       }
 

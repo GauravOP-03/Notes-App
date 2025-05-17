@@ -4,7 +4,7 @@ import { BACKEND_URL } from "@/config";
 import AllNotes from "./notes/AllNotes";
 import AddNotes from "./notes/AddNotes";
 import { Note } from "@/types/schema";
-
+import { useSetNoteTags } from "./utils/useSetNoteTags";
 const NotesController = () => {
     const { loading, notes, error, setNotes } = useNotes();
 
@@ -20,6 +20,7 @@ const NotesController = () => {
         }
     }
 
+    const setNoteTags = useSetNoteTags();
     async function onSave(editedData: Note) {
         const id = editedData._id;
         if (!id) return;
@@ -34,6 +35,10 @@ const NotesController = () => {
                 note._id === id ? { ...note, ...response.data.data } : note
             );
             setNotes(updatedNotes);
+
+            setTimeout(() => {
+                setNoteTags(response.data.data._id);
+            }, 10000);
         } catch (error) {
             console.error("Error saving the note:", error);
         }

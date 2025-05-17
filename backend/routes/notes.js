@@ -120,7 +120,7 @@ router.put("/:id", verifyToken, upload.single("file"), async (req, res) => {
       return res.status(404).json({ message: "Note not found" });
     }
 
-    console.log("Updated note:", updatedNote);
+    // console.log("Updated note:", updatedNote);
     res
       .status(200)
       .json({ message: "Note updated successfully", data: updatedNote });
@@ -214,9 +214,9 @@ router.delete("/:id/voice", verifyToken, async (req, res) => {
 router.post("/:id/share", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { expireInHour } = req.body;
-  console.log(expireInHour);
+  // console.log(expireInHour);
   const sharedUntil = new Date(Date.now() + expireInHour * 60 * 60 * 1000);
-  console.log(sharedUntil);
+  // console.log(sharedUntil);
   const shareId = require("crypto").randomBytes(8).toString("hex");
   const updatedNote = await note.findByIdAndUpdate(
     id,
@@ -228,7 +228,7 @@ router.post("/:id/share", verifyToken, async (req, res) => {
     { new: true }
   );
   if (!updatedNote) return res.status(400).json({ message: "Notes not Found" });
-  console.log(updatedNote);
+  // console.log(updatedNote);
   return res.status(200).json({
     message: "shared link generated",
     shareId: updatedNote.shareId,
@@ -271,17 +271,39 @@ router.get("/:id/summarize", verifyToken, async (req, res) => {
     }
     const noteContent = findNotes.noteBody;
     const summary = await summarize(noteContent);
-    // console.log(summary);
-    const newSummary = new noteAiData({
-      summary,
-      noteId: id,
-    });
-    await newSummary.save();
+    // const tag = await tags(noteContent);
+
+    const presentNotes = await noteAiData.findOneAndUpdate(
+      { noteId: id },
+      { summary },
+      { new: true }
+    );
+
+    let responseSummary;
+    let responseCreatedAt;
+    let responseUpdatedAt;
+
+    if (presentNotes) {
+      responseSummary = presentNotes.summary;
+      responseCreatedAt = presentNotes.createdAt;
+      responseUpdatedAt = presentNotes.updatedAt;
+    } else {
+      const newSummary = new noteAiData({
+        summary,
+        noteId: id,
+      });
+
+      const savedSummary = await newSummary.save();
+      responseSummary = savedSummary.summary;
+      responseCreatedAt = savedSummary.createdAt;
+      responseUpdatedAt = savedSummary.updatedAt;
+    }
+
     res.status(200).json({
       message: "Note summarized successfully",
-      summary: newSummary.summary,
-      createdAt: newSummary.updatedAt,
-      updatedAt: newSummary.createdAt,
+      summary: responseSummary,
+      createdAt: responseCreatedAt,
+      updatedAt: responseUpdatedAt,
     });
   } catch (e) {
     console.error("Error summarizing note:", e.message);
@@ -291,37 +313,60 @@ router.get("/:id/summarize", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/:id/tags", async (req, res) => {
+router.get("/:id/tags", verifyToken, async (req, res) => {
   const { id } = req.params;
-  console.log(id);
   try {
     const { tags } = require("../gemini/gemini");
     const findNotes = await note.findById(id).populate("owner").exec();
+
     if (!findNotes) {
       return res.status(404).json({ message: "Note not found" });
     }
+
     if (findNotes.owner._id.toString() !== req.user.userId) {
       return res
         .status(403)
-        .json({ message: "You are not authorized to summarize this note" });
+        .json({ message: "You are not authorized to access this note" });
     }
+
     const noteContent = findNotes.noteBody;
     const generatedTags = await tags(noteContent);
-    console.log(generatedTags);
-    // const newSummary = new noteAiData({
-    //   summary,
+    const tagArray = generatedTags
+      .split(",")
+      .map((tag) => tag.trim().toLowerCase());
+
+    const presentNotes = await noteAiData.findOneAndUpdate(
+      { noteId: id },
+      { tags: tagArray },
+      { new: true }
+    );
+
+    let tag;
+
+    if (presentNotes) {
+      tag = presentNotes.tags;
+    } else {
+      const tags = new noteAiData({
+        tags: tagArray,
+        noteId: id,
+      });
+
+      const newTag = await tags.save();
+      tag = newTag.tags;
+    }
+
+    res.status(200).json(tag);
+
+    // const newTags = new noteAiData({
+    //   tags: tagArray,
     //   noteId: id,
     // });
-    // await newSummary.save();
-    // res.status(200).json({
-    //   message: "Note summarized successfully",
-    //   summary: newSummary.summary,
-    //   createdAt:newSummary.updatedAt,
-    //   updatedAt:newSummary.createdAt,
 
-    // });
+    // await newTags.save();
+
+    // res.status(200).json(tagArray);
   } catch (e) {
-    console.error("Error summarizing note:", e.message);
+    console.error("Error generating tags:", e.message);
     res
       .status(500)
       .json({ message: "Internal server error", error: e.message });
