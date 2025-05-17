@@ -53,6 +53,9 @@ export interface Note {
   image: string[];
   transcribedText?: string;
   audioFile?: string | null;
+  shareId?: string;
+  visibility: "public" | "private";
+  sharedUntil?: string;
 }
 
 export interface UserProp {

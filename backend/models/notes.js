@@ -10,6 +10,13 @@ const noteSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    shareId: String,
+    sharedUntil: Date,
+    visibility: {
+      type: String,
+      enum: ["public", "private"],
+      default: "private",
+    },
   },
   { timestamps: true }
 );

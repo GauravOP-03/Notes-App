@@ -39,6 +39,28 @@ const NotesController = () => {
         }
     }
 
+    async function onShare(noteId: string) {
+        try {
+            const response = await axios.post(`${BACKEND_URL}/notes/${noteId}/share`, { expireInHour: "24" }, {
+                withCredentials: true,
+            });
+            console.log(response.data)
+            setNotes((prev) => {
+                const updatedNotes = prev.map((note) => {
+                    if (note._id === noteId) {
+                        return { ...note, shareId: response.data.shareId, visibility: response.data.visibility, sharedUntil: response.data.sharedUntil };
+                    }
+                    return note;
+                })
+                return updatedNotes;
+            })
+
+            console.log(notes);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     // if (loading) return <NotesLoader />;
     // if (error) return <Error />;
     // if (!notes || notes.length === 0) return (<> <AddNotes /> <NotesEmpty /> </>);
@@ -46,7 +68,7 @@ const NotesController = () => {
     return (
         <>
             <AddNotes />
-            <AllNotes onDelete={onDelete} onSave={onSave} />
+            <AllNotes onDelete={onDelete} onSave={onSave} onShare={onShare} />
         </>
     );
 };

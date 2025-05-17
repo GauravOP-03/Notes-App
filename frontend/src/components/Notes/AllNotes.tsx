@@ -10,13 +10,15 @@ import FloatingActions from "@/components/layout/FloatingActions";
 import Navbar from "@/components/layout/Navbar";
 import NotesLoader from "../NotesLoader";
 import NotesEmpty from "../NotesEmpty";
+// import { Toaster } from "../ui/sonner";
 
 interface AllNotesProps {
   onDelete: (id: string) => Promise<void>;
   onSave: (updatedNote: Note) => Promise<void>;
+  onShare: (noteId: string) => Promise<void>;
 }
 
-export default function AllNotes({ onDelete, onSave }: AllNotesProps) {
+export default function AllNotes({ onDelete, onSave, onShare }: AllNotesProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,6 +60,7 @@ export default function AllNotes({ onDelete, onSave }: AllNotesProps) {
 
 
       <main className="flex-1 px-6 pb-20">
+        {/* <Toaster /> */}
         {loading ? (
           <NotesLoader />
         ) : filteredNotes.length === 0 ? (
@@ -75,6 +78,7 @@ export default function AllNotes({ onDelete, onSave }: AllNotesProps) {
                   note={note}
                   onDelete={onDelete}
                   onClick={() => handleCardClick(note)}
+                  onShare={onShare}
                 />
               </motion.div>
             ))}

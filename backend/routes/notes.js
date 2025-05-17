@@ -198,4 +198,48 @@ router.delete("/:id/voice", verifyToken, async (req, res) => {
   }
 });
 
+router.post("/:id/share", verifyToken, async (req, res) => {
+  const { id } = req.params;
+  const { expireInHour } = req.body;
+  console.log(expireInHour);
+  const sharedUntil = new Date(Date.now() + expireInHour * 60 * 60 * 1000);
+  console.log(sharedUntil);
+  const shareId = require("crypto").randomBytes(8).toString("hex");
+  const updatedNote = await note.findByIdAndUpdate(
+    id,
+    {
+      shareId,
+      sharedUntil: sharedUntil,
+      visibility: "public",
+    },
+    { new: true }
+  );
+  if (!updatedNote) return res.status(400).json({ message: "Notes not Found" });
+  console.log(updatedNote);
+  return res.status(200).json({
+    message: "shared link generated",
+    shareId: updatedNote.shareId,
+    sharedUntil: updatedNote.sharedUntil,
+    visibility: updatedNote.visibility,
+  });
+});
+
+router.get("/shared/:shareId/", async (req, res) => {
+  const { shareId } = req.params;
+  // console.log(shareId);
+  const sharedNotes = await note
+    .findOne({ shareId })
+    .select("-_id -__v -owner");
+  // console.log(sharedNotes);
+  if (!sharedNotes) return res.status(404).json({ message: "Note not found" });
+  if (
+    sharedNotes.sharedUntil &&
+    new Date(sharedNotes.sharedUntil).getTime() < Date.now()
+  ) {
+    return res.status(410).json({ message: "Sharing Link is expired" });
+  }
+
+  return res.json({ message: "Fetched Notes successfully", sharedNotes });
+});
+
 module.exports = router;
