@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { useState } from "react";
-import { Pencil } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Pencil, X, Image, Mic, FileText, Sparkles, Trash2, ZoomIn } from "lucide-react";
 import { Button } from "../ui/button";
+import { motion, AnimatePresence } from "motion/react";
 
 import { Note } from "@/types/schema";
 import axios from "axios";
@@ -13,7 +14,6 @@ interface NoteModalProps {
   note: Note | null;
   onSave: (updatedNote: Note) => Promise<void>; // Function to save changes
   summarize: (id: string) => Promise<void>;
-  //  // Loading state
 }
 
 export const NoteModal = ({
@@ -23,15 +23,47 @@ export const NoteModal = ({
   onSave,
   summarize
 }: NoteModalProps) => {
-
   if (!note || !isOpen) return null;
 
-
-  // console.log(note)
   const [editedNote, setEditedNote] = useState<Note>(note);
-  // console.log("edited note:", editedNote)
-  const [loading, setLoading] = useState(false)
+  useEffect(() => {
+    setEditedNote(note);
+  }, [note]);
+
+  const [loading, setLoading] = useState(false);
   const [summarizing, setSummarizing] = useState(false);
+  const [displayedSummary, setDisplayedSummary] = useState<string>("");
+  const summaryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Animate summary word by word
+  useEffect(() => {
+    if (
+      !summarizing &&
+      editedNote.aiData?.summary &&
+      editedNote.aiData.summary !== displayedSummary
+    ) {
+      if (summaryTimeoutRef.current) clearTimeout(summaryTimeoutRef.current);
+
+      const words = editedNote.aiData.summary.split(" ");
+      let idx = 0;
+      setDisplayedSummary("");
+
+      function showNextWord() {
+        setDisplayedSummary((prev) =>
+          prev ? prev + " " + words[idx] : words[idx]
+        );
+        idx++;
+        if (idx < words.length) {
+          summaryTimeoutRef.current = setTimeout(showNextWord, 40);
+        }
+      }
+      showNextWord();
+
+      return () => {
+        if (summaryTimeoutRef.current) clearTimeout(summaryTimeoutRef.current);
+      };
+    }
+  }, [editedNote.aiData?.summary, summarizing]);
 
   // Handle input changes
   const handleChange = (
@@ -39,7 +71,6 @@ export const NoteModal = ({
   ) => {
     const { name, value } = e.target;
     setEditedNote((prev) => ({ ...prev, [name]: value }));
-    // console.log(editedNote)
   };
 
   // Handle file input changes
@@ -56,11 +87,9 @@ export const NoteModal = ({
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
   const [deleteAudio, setDeleteAudio] = useState<boolean>(false);
 
-
   const handleSave = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-
       for (const img of imagesToDelete) {
         await axios.delete(`${BACKEND_URL}/notes/${editedNote._id}/image`, {
           data: { img },
@@ -79,32 +108,13 @@ export const NoteModal = ({
       console.log(editedNote);
       onClose();
     } catch (e) {
-      console.log(e)
+      console.log(e);
     } finally {
-      setLoading(false)
+      setLoading(false);
       setDeleteAudio(false);
       setImagesToDelete([]);
     }
   };
-
-  // const deleteImage = async (img: string, id: string) => {
-  //   try {
-
-  //     const response = await axios.delete(`${BACKEND_URL}/notes/${id}/image`, {
-  //       headers: {
-  //         Authorization: localStorage.getItem("token"),
-  //       },
-  //       data: { img }
-  //     })
-  //     console.log(response)
-  //     const updatedImages = response.data.data.image
-  //     console.log(updatedImages)
-  //     setEditedNote((prev) => ({ ...prev, image: updatedImages }))
-  //     await onSave(editedNote);
-  //   } catch (e) {
-  //     console.log(e)
-  //   }
-  // }
 
   async function summarizeText(id: string) {
     setSummarizing(true);
@@ -114,6 +124,7 @@ export const NoteModal = ({
       setSummarizing(false);
     }
   }
+
   const markImageForDeletion = (img: string) => {
     setEditedNote(prev => ({
       ...prev,
@@ -125,214 +136,391 @@ export const NoteModal = ({
   const markAudioForDeletion = () => {
     setEditedNote(prev => ({ ...prev, audioFile: null }));
     setDeleteAudio(true);
-    // console.log("maked audio")
   };
 
-
-  // const deleteVoice = async (voice: string, id: string) => {
-  //   try {
-  //     await axios.delete(`${BACKEND_URL}/notes/${id}/voice`, {
-  //       headers: {
-  //         Authorization: localStorage.getItem("token") || "",
-  //       },
-  //       data: { voice },
-  //     });
-  //     const updatedNote = { ...editedNote, audioFile: null };
-  //     setEditedNote(updatedNote);
-  //     await onSave(updatedNote);
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
-
-
   return (
-    <>
-      {/* Dimmed Background */}
-      <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-        onClick={onClose}
-      />
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
+            onClick={onClose}
+          />
 
-      {/* Modal */}
-      <div
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? "opacity-100 scale-100" : "opacity-0 scale-95"
-          }`}
-      >
-        <div className="w-full max-w-5xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+          {/* Modal */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="fixed inset-4 md:inset-6 lg:inset-8 xl:inset-12 z-50 flex items-center justify-center"
+          >
+            <div className="w-full h-full bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden">
 
-          {/* Sticky Header */}
-          <div className="border-b px-6 py-4 bg-white sticky top-0 z-10 shadow-sm">
-            <input
-              type="text"
-              name="heading"
-              value={editedNote.heading}
-              onChange={handleChange}
-              placeholder="Note Title..."
-              className="w-full text-3xl font-semibold tracking-tight text-gray-900 bg-transparent outline-none placeholder-gray-400"
-            />
-            <p className="text-xs text-gray-500 mt-1 italic">
-              Last edited:{" "}
-              {new Date(editedNote.updatedAt).toLocaleString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              })}
-            </p>
-          </div>
+              {/* Header */}
+              <motion.div
+                className="border-b border-gray-100 px-6 py-5 bg-gray-50/50 sticky top-0 z-10"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900">Edit Note</h2>
+                      <p className="text-xs text-gray-500">
+                        Last edited: {new Date(editedNote.updatedAt).toLocaleString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={onClose}
+                    variant="ghost"
+                    size="sm"
+                    className="w-10 h-10 p-0 rounded-full hover:bg-gray-100 transition-colors duration-200"
+                  >
+                    <X className="h-5 w-5 text-gray-600" />
+                  </Button>
+                </div>
+                <input
+                  type="text"
+                  name="heading"
+                  value={editedNote.heading}
+                  onChange={handleChange}
+                  placeholder="Note Title..."
+                  className="w-full text-2xl font-semibold text-gray-900 bg-transparent outline-none placeholder-gray-400 border-b border-transparent focus:border-violet-400 transition-colors duration-200 pb-2"
+                />
+              </motion.div>
 
-          {/* Body */}
-          <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 bg-gray-50 scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 scrollbar-track-transparent">
+              {/* Body */}
+              <div className="flex-1 overflow-y-auto bg-white">
+                <div className="p-6 grid grid-cols-1 xl:grid-cols-4 gap-6 min-h-full">
 
-            {/* Note Text */}
-            <div className="lg:col-span-2">
-              <label className="text-sm font-semibold text-gray-700 block mb-2">
-                Note Body
-              </label>
-              <textarea
-                name="noteBody"
-                value={editedNote.noteBody}
-                onChange={handleChange}
-                placeholder="Write your note here..."
-                className="w-full h-[300px] lg:h-[500px] p-4 bg-white rounded-lg border border-gray-300 text-gray-800 text-base resize-none focus:ring-2 focus:ring-gray-400 focus:outline-none leading-relaxed tracking-wide shadow-sm"
-              />
-            </div>
+                  {/* Main Content - Note Text */}
+                  <motion.div
+                    className="xl:col-span-3 space-y-4"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <div className="space-y-2">
+                      <label className="flex items-center text-sm font-medium text-gray-700">
+                        <FileText className="w-4 h-4 mr-2 text-violet-600" />
+                        Note Content
+                      </label>
+                      <textarea
+                        name="noteBody"
+                        value={editedNote.noteBody}
+                        onChange={handleChange}
+                        placeholder="Start writing your note here..."
+                        className="w-full h-[500px] xl:h-[600px] p-4 bg-gray-50 rounded-lg border border-gray-200 text-gray-800 text-base resize-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 focus:outline-none leading-relaxed tracking-wide transition-all duration-200"
+                      />
+                      <div className="text-xs text-gray-500 text-right">
+                        {editedNote.noteBody.length > 0 && `${editedNote.noteBody.split(' ').filter(word => word.length > 0).length} words`}
+                      </div>
+                    </div>
+                  </motion.div>
 
-            {/* Sidebar */}
-            <div className="space-y-4">
+                  {/* Sidebar */}
+                  <motion.div
+                    className="xl:col-span-1 space-y-4"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
 
-              {/* AI Summary */}
-              {editedNote.aiData?.summary && (
-                <div className="bg-white rounded-xl p-4 border-l-4 border-blue-500 shadow-sm">
-                  <p className="text-sm font-semibold text-gray-700 mb-2">
-                    AI Summary
-                  </p>
-                  <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
-                    {editedNote.aiData.summary}
-                  </p>
-                  {editedNote.aiData.tags && editedNote.aiData.tags?.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {editedNote.aiData.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded-full"
+                    {/* AI Summary */}
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="flex items-center text-sm font-medium text-gray-700">
+                          <Sparkles className="w-4 h-4 mr-2 text-violet-600" />
+                          AI Summary
+                        </h3>
+                        <Button
+                          onClick={() => summarizeText(editedNote._id)}
+                          disabled={summarizing}
+                          size="sm"
+                          variant="outline"
+                          className="text-xs h-7 px-2"
                         >
-                          #{tag}
-                        </span>
-                      ))}
+                          {summarizing ? "..." : "Generate"}
+                        </Button>
+                      </div>
+
+                      <AnimatePresence mode="wait">
+                        {summarizing ? (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="space-y-2"
+                          >
+                            {[...Array(3)].map((_, i) => (
+                              <div
+                                key={i}
+                                className="h-3 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-pulse"
+                                style={{ width: `${80 + Math.random() * 20}%` }}
+                              />
+                            ))}
+                          </motion.div>
+                        ) : editedNote.aiData?.summary ? (
+                          <motion.p
+                            className="text-sm text-gray-700 leading-relaxed"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                          >
+                            {displayedSummary}
+                          </motion.p>
+                        ) : (
+                          <p className="text-sm text-gray-400 italic">No summary yet.</p>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Tags */}
+                      <AnimatePresence>
+                        {editedNote.aiData?.tags && editedNote.aiData.tags.length > 0 && (
+                          <motion.div
+                            className="mt-3 flex flex-wrap gap-1"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                          >
+                            {editedNote.aiData.tags.map((tag, index) => (
+                              <motion.span
+                                key={tag}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: index * 0.05 }}
+                                className="px-2 py-1 text-xs bg-violet-100 text-violet-700 rounded-full"
+                              >
+                                #{tag}
+                              </motion.span>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    {/* Transcription */}
+                    <AnimatePresence>
+                      {editedNote.transcribedText && editedNote.transcribedText !== "null" && (
+                        <motion.div
+                          className="bg-gray-50 rounded-xl p-4 border border-gray-200"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                        >
+                          <h3 className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                            <Mic className="w-4 h-4 mr-2 text-violet-600" />
+                            Transcription
+                          </h3>
+                          <textarea
+                            name="transcribedText"
+                            value={editedNote.transcribedText}
+                            onChange={handleChange}
+                            placeholder="Transcribed text..."
+                            className="w-full h-24 p-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 resize-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 transition-all duration-200"
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {/* Audio */}
+                    <AnimatePresence>
+                      {editedNote.audioFile && !deleteAudio && (
+                        <motion.div
+                          className="bg-gray-50 rounded-xl p-4 border border-gray-200"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <h3 className="flex items-center text-sm font-medium text-gray-700">
+                              <Mic className="w-4 h-4 mr-2 text-violet-600" />
+                              Audio
+                            </h3>
+                            <Button
+                              onClick={markAudioForDeletion}
+                              size="sm"
+                              variant="ghost"
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 px-2"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                          <audio controls className="w-full rounded-lg">
+                            <source src={editedNote.audioFile} type="audio/wav" />
+                            Your browser does not support the audio element.
+                          </audio>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {/* Images */}
+                    <AnimatePresence>
+                      {editedNote.image?.filter(Boolean).length > 0 && (
+                        <motion.div
+                          className="bg-gray-50 rounded-xl p-4 border border-gray-200"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                        >
+                          <h3 className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                            <Image className="w-4 h-4 mr-2 text-violet-600" />
+                            Images ({editedNote.image?.filter(Boolean).length})
+                          </h3>
+                          <div className="grid grid-cols-1 gap-3">
+                            {editedNote.image.map(
+                              (img, idx) =>
+                                img && (
+                                  <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    className={`relative rounded-lg overflow-hidden group aspect-video border-2 transition-all duration-300 ${imagesToDelete.includes(img)
+                                      ? "border-red-300 opacity-50"
+                                      : "border-gray-200 hover:border-violet-300"
+                                      }`}
+                                  >
+                                    <img
+                                      src={img}
+                                      alt={`Note image ${idx + 1}`}
+                                      className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                                    />
+
+                                    {imagesToDelete.includes(img) && (
+                                      <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
+                                        <span className="text-red-700 text-xs font-medium bg-white px-2 py-1 rounded">
+                                          Marked for deletion
+                                        </span>
+                                      </div>
+                                    )}
+
+                                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex space-x-1">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          window.open(img, '_blank');
+                                        }}
+                                        className="w-7 h-7 bg-gray-900/80 text-white rounded-full flex items-center justify-center hover:bg-gray-900 transition-colors duration-200"
+                                        title="View full size"
+                                      >
+                                        <ZoomIn className="w-3 h-3" />
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          markImageForDeletion(img);
+                                        }}
+                                        className="w-7 h-7 bg-red-600/80 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
+                                        title="Mark for deletion"
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  </motion.div>
+                                )
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {/* Upload Section */}
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                      <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                        <Image className="w-4 h-4 mr-2 text-violet-600" />
+                        Add Image
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="file"
+                          name="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          className="hidden"
+                          id="image-upload-edit"
+                        />
+                        <label
+                          htmlFor="image-upload-edit"
+                          className="flex items-center justify-center h-16 bg-white border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-violet-400 hover:bg-violet-50 transition-all duration-200 group"
+                        >
+                          <div className="text-center">
+                            <div className="w-6 h-6 text-gray-400 mx-auto mb-1 group-hover:text-violet-500 transition-colors duration-200">
+                              <Image className="w-full h-full" />
+                            </div>
+                            <p className="text-xs text-gray-500 group-hover:text-violet-600 transition-colors duration-200">
+                              Click to upload
+                            </p>
+                          </div>
+                        </label>
+                      </div>
+                      {
+                        editedNote.file && (
+                          <img height={400} width={400} src={URL.createObjectURL(editedNote.file)} alt="Preview" className="mt-3 rounded-lg" />
+                        )
+                      }
+                    </div>
+
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <motion.div
+                className="flex justify-end items-center gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/50 sticky bottom-0"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <Button
+                  variant="outline"
+                  onClick={onClose}
+                  className="px-6 h-10 border-gray-300 hover:bg-gray-50"
+                >
+                  Close
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  disabled={loading}
+                  className="px-6 h-10 bg-gray-900 hover:bg-gray-800 text-white transition-colors duration-200 disabled:opacity-50"
+                >
+                  {loading ? (
+                    <div className="flex items-center space-x-2">
+                      <motion.div
+                        className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      />
+                      <span>Saving...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <Pencil className="w-4 h-4" />
+                      <span>Save Changes</span>
                     </div>
                   )}
-                </div>
-              )}
-
-              {/* Transcription */}
-              {editedNote.transcribedText && editedNote.transcribedText !== "null" && (
-                <div className="bg-white p-4 rounded-xl border-l-4 border-green-500 shadow-sm space-y-2">
-                  <p className="text-sm font-semibold text-gray-700">Transcription</p>
-                  <textarea
-                    name="transcribedText"
-                    value={editedNote.transcribedText}
-                    onChange={handleChange}
-                    placeholder="Write 'null' to delete..."
-                    className="w-full h-32 p-3 border rounded-md text-sm text-gray-700 resize-none focus:ring-2 focus:ring-gray-300"
-                  />
-                </div>
-              )}
-
-              {/* Audio */}
-              {editedNote.audioFile && !deleteAudio && (
-                <div className="bg-white p-4 rounded-xl border shadow-sm space-y-2">
-                  <p className="text-sm font-semibold text-gray-700">Audio</p>
-                  <audio controls className="w-full rounded">
-                    <source src={editedNote.audioFile} type="audio/wav" />
-                    Your browser does not support the audio element.
-                  </audio>
-                  <Button onClick={markAudioForDeletion}>Delete Audio</Button>
-                </div>
-              )}
-
-              {/* Images */}
-              {editedNote.image?.filter(Boolean).length > 0 && (
-                <div className="bg-white p-4 rounded-xl border shadow-sm">
-                  <p className="text-sm font-semibold text-gray-700 mb-2">Images</p>
-                  <div className="grid grid-cols-2 gap-4">
-                    {editedNote.image.map(
-                      (img, idx) =>
-                        img && (
-                          <div
-                            key={idx}
-                            className={`relative rounded-xl overflow-hidden group aspect-[4/3] border transition-all duration-300 ${imagesToDelete.includes(img)
-                              ? "border-red-500 opacity-60"
-                              : "border-gray-200 hover:shadow-lg"
-                              }`}
-                          >
-                            <img
-                              src={img}
-                              alt={`Note image ${idx}`}
-                              className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-                            />
-                            {imagesToDelete.includes(img) && (
-                              <div className="absolute inset-0 bg-red-500 bg-opacity-40 flex items-center justify-center text-white text-sm font-bold">
-                                Marked
-                              </div>
-                            )}
-                            <button
-                              onClick={() => markImageForDeletion(img)}
-                              title="Mark for deletion"
-                              className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-md"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        )
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Upload */}
-              <div>
-                <label className="block font-semibold text-gray-800 mb-2">
-                  Upload Image
-                </label>
-                <input
-                  type="file"
-                  name="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="w-full text-sm text-gray-700 border rounded-lg p-2"
-                />
-              </div>
+                </Button>
+              </motion.div>
             </div>
-          </div>
-
-          {/* Sticky Footer */}
-          <div className="flex justify-end items-center gap-4 px-6 py-4 border-t border-gray-200 bg-white sticky bottom-0 shadow-sm z-10">
-            <Button variant="outline" onClick={onClose}>
-              Close
-            </Button>
-            <Button
-              onClick={() => summarizeText(editedNote?._id)}
-              disabled={summarizing}
-            >
-              {summarizing ? "Summarizing..." : "Summarize"}
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={loading}
-              className="flex items-center gap-2"
-            >
-              <Pencil className="h-4 w-4" />
-              {loading ? "Saving..." : "Save"}
-            </Button>
-          </div>
-        </div>
-      </div>
-    </>
-
-
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 };

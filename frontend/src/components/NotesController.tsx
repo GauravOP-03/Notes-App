@@ -4,7 +4,9 @@ import { BACKEND_URL } from "@/config";
 import AllNotes from "./notes/AllNotes";
 import AddNotes from "./notes/AddNotes";
 import { Note } from "@/types/schema";
+import { toast } from 'sonner';
 import { useSetNoteTags } from "./utils/useSetNoteTags";
+import Footer from "./layout/Footer";
 const NotesController = () => {
     const { loading, notes, error, setNotes } = useNotes();
 
@@ -59,9 +61,15 @@ const NotesController = () => {
                 })
                 return updatedNotes;
             })
+            toast.success("Share link generated!", {
+                description: "Your note is now publicly accessible.",
+            });
 
             console.log(notes);
         } catch (e) {
+            toast.error("Something went wrong", {
+                description: "Please try again or check your internet connection.",
+            });
             console.error(e);
         }
     }
@@ -84,12 +92,49 @@ const NotesController = () => {
     // if (loading) return <NotesLoader />;
     // if (error) return <Error />;
     // if (!notes || notes.length === 0) return (<> <AddNotes /> <NotesEmpty /> </>);
+    async function onShareRemove(noteId: string) {
+        try {
+            const response = await axios.patch(`${BACKEND_URL}/notes/${noteId}/share/remove`, {}, {
+                withCredentials: true,
+            });
+            console.log(response.data)
+            setNotes((prev) => {
+                const updatedNotes = prev.map((note) => {
+                    if (note._id === noteId) {
+                        return { ...note, visibility: response.data.visibility };
+                    }
+                    return note;
+                })
+                return updatedNotes;
+            })
+            toast.success("Share link removed!", {
+                description: "Your note is no longer publicly accessible.",
+            });
+
+            console.log(notes);
+        } catch (e) {
+            toast.error("Something went wrong", {
+                description: "Please try again or check your internet connection.",
+            });
+            console.error(e);
+        }
+    }
 
     return (
-        <>
-            <AddNotes />
-            <AllNotes onDelete={onDelete} onSave={onSave} onShare={onShare} summarize={summarize} />
-        </>
+        <div className="relative min-h-screen flex flex-col">
+            <main className="flex-1 pb-24">
+                <AddNotes />
+                <AllNotes
+                    onDelete={onDelete}
+                    onSave={onSave}
+                    onShare={onShare}
+                    summarize={summarize}
+                    onShareRemove={onShareRemove}
+                />
+            </main>
+            <Footer />
+        </div>
+
     );
 };
 

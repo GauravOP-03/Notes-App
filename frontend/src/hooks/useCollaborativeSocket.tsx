@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import io, { Socket } from "socket.io-client";
+import { toast } from "sonner";
 
 interface CursorData {
     userId: string;
@@ -30,15 +31,19 @@ export function useCollaborativeSocket(roomId: string, userId: string, username:
         const socketInstance = io("http://localhost:3000");
         setSocket(socketInstance);
         socketInstance.emit("joinRoom", { roomId, uid: userId, username });
-        socketInstance.on("userJoined", (userData) => {
-            // console.log("userdata", userData)
-            setAllUser((prev) => {
-                return [...prev, userData];
-            });
-            // setAllUser((prev) => { return [...prev, userData] });
-            // console.log(allUser);
-        })
+        // socketInstance.on("userJoined", (userData) => {
+        //     setAllUser((prev) => {
+        //         // Only add if user is not already present
+        //         if (prev.some(user => user.uid === userData.uid)) return prev;
+        //         return [...prev, userData];
+        //     });
+        //     console.log(allUser)
+        // })
 
+        socketInstance.on("userList", (users) => {
+            setAllUser(users);
+            console.log(users)
+        });
         socketInstance.on("userLeft", ({ uid }) => {
             setAllUser((prev) => prev.filter(user => user.uid !== uid));
         });
@@ -81,12 +86,15 @@ export function useCollaborativeSocket(roomId: string, userId: string, username:
         })
 
         socketInstance.on("locked", () => {
-            // console.log("locked", locked)
+            // console.log("locked", locked)    
+            toast.info("Notes have been locked by the host.");
+
             setLocked(true);
         })
 
         socketInstance.on("unlock", () => {
             // console.log("unlocked", locked);
+            toast.info("Notes have been unlocked by the host.");
             setLocked(false);
         })
 

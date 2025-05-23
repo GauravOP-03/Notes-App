@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Save, Share2, Loader2 } from "lucide-react";
+import { Save, Share2, Loader2, Lock, Unlock } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { useCollaborativeSocket } from "@/hooks/useCollaborativeSocket";
@@ -13,6 +13,7 @@ import { BACKEND_URL } from "@/config";
 import { useNotes } from "@/context/NotesContext";
 import { ChatArea } from "@/components/ChatArea";
 import Navbar from "@/components/layout/Navbar";
+import { toast } from "sonner";
 
 export default function RealTimeTextEditor() {
   const { id } = useParams();
@@ -23,7 +24,6 @@ export default function RealTimeTextEditor() {
 
   const [title, setTitle] = useState("");
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -41,8 +41,7 @@ export default function RealTimeTextEditor() {
     lockNotes,
     locked,
     host,
-    error
-
+    error,
   } = useCollaborativeSocket(id || "", userId, username);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -51,8 +50,6 @@ export default function RealTimeTextEditor() {
     typingStatus();
     emitTextUpdate(newText);
     emitCursorUpdate(e.target.selectionStart);
-    console.log(allUser)
-    console.log(locked)
   };
 
   const handleCursorMove = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -61,23 +58,26 @@ export default function RealTimeTextEditor() {
 
   const handleSaveNote = async () => {
     if (!text.trim() || !title.trim()) {
-      setMessage({ type: "error", text: "Please provide a title and some content." });
+      toast.error("Please provide a title and some content.");
       return;
     }
     setSaving(true);
-    setMessage(null);
     try {
-      const res = await axios.post(`${BACKEND_URL}/notes`, {
-        heading: title,
-        noteBody: text,
-        image: [],
-        audioFile: null,
-      }, { withCredentials: true });
+      const res = await axios.post(
+        `${BACKEND_URL}/notes`,
+        {
+          heading: title,
+          noteBody: text,
+          image: [],
+          audioFile: null,
+        },
+        { withCredentials: true }
+      );
       setNotes((prevNotes) => [...prevNotes, res.data.data]);
-      setMessage({ type: "success", text: "Note saved successfully!" });
+      toast.success("Note saved successfully!");
     } catch (error) {
-      console.error(error)
-      setMessage({ type: "error", text: "Failed to save note" });
+      console.error(error);
+      toast.error("Failed to save note");
     } finally {
       setSaving(false);
     }
@@ -86,41 +86,41 @@ export default function RealTimeTextEditor() {
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      setMessage({ type: "success", text: "Share link copied to clipboard!" });
+      toast.success("Share link copied to clipboard!");
     } catch (error) {
-      console.error(error)
-      setMessage({ type: "error", text: "Copy failed" });
+      console.error(error);
+      toast.error("Copy failed");
     }
   };
 
   return (
     <>
       <Navbar />
-      <div className="flex flex-col items-center justify-center p-4 min-h-screen bg-muted">
-        <Card className="w-full max-w-3xl shadow-xl border rounded-2xl">
-
-          <CardContent className="p-6 space-y-5 relative">
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold tracking-tight">
+      <div className="min-h-screen bg-muted px-4 py-8 flex flex-col items-center">
+        <Card className="w-full max-w-7xl rounded-3xl shadow-lg border bg-white flex flex-col md:flex-row overflow-hidden">
+          {/* Left side: Editor */}
+          <div className="flex flex-col flex-1 p-6 md:p-8 gap-4 h-[80vh] md:h-auto">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight mb-3">
                 Collaborative Note Editing
               </h2>
               <Input
                 placeholder="Title your shared note..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="text-lg"
+                className="text-lg rounded-xl"
                 disabled={saving}
               />
             </div>
 
-            <div className="relative">
+            <div className="relative flex-1 rounded-xl border shadow-sm overflow-hidden">
               <Textarea
                 ref={textareaRef}
                 value={text}
                 onChange={handleTextChange}
                 onSelect={handleCursorMove}
                 placeholder="Type collaboratively with others..."
-                className="h-64 text-base"
+                className="w-full h-full p-4 resize-none text-base bg-white"
                 disabled={(host !== userId && locked) || saving}
               />
               <CursorOverlay
@@ -131,76 +131,85 @@ export default function RealTimeTextEditor() {
             </div>
 
             {error && (
-              <div className="text-sm px-3 py-2 rounded bg-red-100 text-red-700 mb-2">
+              <div className="text-sm px-3 py-2 rounded bg-red-100 text-red-700">
                 {error}
               </div>
             )}
 
-            <div className="mt-6 border-t pt-4">
-              <h3 className="text-lg font-medium mb-2">Chat</h3>
-              <ChatArea username={username} emitMessageUpdate={emitMessageUpdate} messages={messages} />
-            </div>
-
-            {message && (
-              <div
-                className={`text-sm px-3 py-2 rounded ${message.type === "success"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-                  }`}
-              >
-                {message.text}
-              </div>
-            )}
-
-            <div className="flex justify-end gap-3 pt-2">
-              <Button
-                variant="outline"
-                className="gap-2"
-                onClick={handleCopyLink}
-                disabled={saving}
-              >
-                <Share2 size={18} />
-                Share
-              </Button>
-              <Button className="gap-2" onClick={handleSaveNote} disabled={saving}>
-                {saving ? <Loader2 className="animate-spin w-4 h-4" /> : <Save size={18} />}
-                {saving ? "Saving..." : "Save Note"}
-              </Button>
-              {host === userId && (
-                <Button
-                  variant={locked ? "default" : "destructive"}
-                  className="gap-2"
-                  onClick={lockNotes}
-                >
-                  {locked ? "Unlock" : "Lock"}
-                </Button>
-              )}
-            </div>
-
-            <div>
-              {allUser.map(({ uid, username }) => (
-                <div key={uid}>
-                  {/* Label bubble */}
-                  <div
-                    className="absolute z-50 bg-blue-600 text-white text-xs px-2 py-0.5 rounded shadow pointer-events-none animate-fadeIn"
-                    style={{
-                      top: "10px",
-                      left: "10px",
-                      transform: "translateY(-100%)", // Position label above caret
-                    }}
+            {/* Toolbar with buttons and user badges */}
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-gray-50 border rounded-xl px-5 py-3 shadow-sm">
+              {/* User badges */}
+              <div className="flex flex-wrap gap-2 text-sm text-blue-800">
+                {allUser.map(({ uid, username }) => (
+                  <span
+                    key={uid}
+                    className="px-3 py-1 bg-blue-100 rounded-full font-medium select-none"
                   >
                     {uid === userId ? "You" : username}
-                  </div>
-                </div>
-              ))}
+                  </span>
+                ))}
+              </div>
+
+              {/* Buttons */}
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant="outline"
+                  className="rounded-full px-5 py-2 text-sm font-semibold flex items-center gap-2"
+                  onClick={handleCopyLink}
+                  disabled={saving}
+                >
+                  <Share2 className="w-5 h-5" /> Share
+                </Button>
+
+                <Button
+                  className="rounded-full px-5 py-2 text-sm font-semibold flex items-center gap-2"
+                  onClick={handleSaveNote}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <Loader2 className="animate-spin w-5 h-5" />
+                  ) : (
+                    <Save className="w-5 h-5" />
+                  )}
+                  {saving ? "Saving..." : "Save Note"}
+                </Button>
+
+                {host === userId && (
+                  <Button
+                    variant={locked ? "default" : "destructive"}
+                    className="rounded-full px-5 py-2 text-sm font-semibold flex items-center gap-2"
+                    onClick={lockNotes}
+                  >
+                    {locked ? (
+                      <Unlock className="w-5 h-5" />
+                    ) : (
+                      <Lock className="w-5 h-5" />
+                    )}
+                    {locked ? "Unlock" : "Lock"}
+                  </Button>
+                )}
+              </div>
             </div>
 
-            <div>
-              {typingUsers.map(({ uid, username }) => (
-                <p key={uid + username} className='text-sm italic text-gray-500'>{username} is typing</p>
-              ))}
-            </div>
-          </CardContent>
+            {/* Typing users indicator */}
+            {typingUsers.length > 0 && (
+              <div className="text-sm italic text-gray-500 mt-2">
+                {typingUsers.map(({ uid, username }) => (
+                  <p key={uid + username}>{username} is typing...</p>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right side: Chat */}
+          <div className="w-full md:w-96 border-l border-gray-200 p-6 overflow-y-auto h-[80vh] flex flex-col">
+            <h3 className="text-xl font-semibold mb-4">Chat</h3>
+            <ChatArea
+              username={username}
+              emitMessageUpdate={emitMessageUpdate}
+              messages={messages}
+            />
+          </div>
         </Card>
       </div>
     </>

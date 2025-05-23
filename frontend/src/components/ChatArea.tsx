@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 
-
 interface ChatMsg {
     userId: string;
     username: string;
     message: string;
 }
+
 interface ChatAreaProps {
     username: string;
     messages: ChatMsg[];
@@ -13,10 +13,8 @@ interface ChatAreaProps {
 }
 
 export function ChatArea({ username, emitMessageUpdate, messages }: ChatAreaProps) {
-    //   const [messages, setMessages] = useState<ChatMsg[]>([]);
     const [input, setInput] = useState("");
     const endRef = useRef<HTMLDivElement>(null);
-
 
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -25,31 +23,52 @@ export function ChatArea({ username, emitMessageUpdate, messages }: ChatAreaProp
     const sendMessage = (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim()) return;
-        emitMessageUpdate(input);
+        emitMessageUpdate(input.trim());
         setInput("");
     };
 
     return (
-        <div className="bg-muted rounded-lg p-3 max-h-48 overflow-y-auto mb-2 border">
-            <div className="space-y-1">
-                {messages.map((msg, idx) => (
-                    <div key={idx} className="text-sm">
-                        <span className="font-semibold">{msg.username === username ? "You" : msg.username}:</span>{" "}
-                        <span>{msg.message}</span>
-                    </div>
-                ))}
+        <div className="bg-white border rounded-xl shadow-sm p-4 flex flex-col max-h-[30rem]">
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+                {messages.map((msg, idx) => {
+                    const isSelf = msg.username === username;
+                    return (
+                        <div
+                            key={idx}
+                            className={`flex ${isSelf ? "justify-end" : "justify-start"}`}
+                        >
+                            <div
+                                className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm ${isSelf
+                                    ? "bg-blue-600 text-white rounded-br-none"
+                                    : "bg-gray-100 text-gray-800 rounded-bl-none"
+                                    }`}
+                            >
+                                <span className="block font-medium mb-0.5">
+                                    {isSelf ? "You" : msg.username}
+                                </span>
+                                <span>{msg.message}</span>
+                            </div>
+                        </div>
+                    );
+                })}
                 <div ref={endRef} />
             </div>
-            <form onSubmit={sendMessage} className="flex gap-2 mt-2">
+
+            {/* Input Area */}
+            <form
+                onSubmit={sendMessage}
+                className="mt-3 flex items-center gap-2 border-t pt-3"
+            >
                 <input
-                    className="flex-1 border rounded px-2 py-1 text-sm"
-                    placeholder="Type a message..."
+                    className="flex-1 rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    placeholder="Type your message..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                 />
                 <button
                     type="submit"
-                    className="bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-all"
                 >
                     Send
                 </button>

@@ -5,7 +5,7 @@ const ai = new GoogleGenerativeAI(process.env.GEMINI_API);
 
 async function summarize(noteContent) {
   const model = ai.getGenerativeModel({ model: "gemini-2.0-flash" });
-  const prompt = `uou are notenest ai you have to summarize this content : ${noteContent}`;
+  const prompt = `you are notenest ai, an AI powered notes application, you have to summarize this content : ${noteContent}`;
   const result = await model.generateContent({
     contents: [
       {
@@ -21,7 +21,9 @@ async function summarize(noteContent) {
 
 async function tags(noteContent) {
   const model = ai.getGenerativeModel({ model: "gemini-2.0-flash" });
-  const prompt = `Choose up to 3 relevant tags from this list: lecture, assignment, exam, code, project, todo, research, idea, personal. Apply them to the following note content, (just give me 3 tags in 3 words nothing else): ${noteContent}`;
+
+  const prompt = `Analyze this note and return exactly 3 single words separated by commas (format: word1, word2, word3): ${noteContent}`;
+
   const result = await model.generateContent({
     contents: [
       {

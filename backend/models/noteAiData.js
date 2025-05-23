@@ -4,21 +4,7 @@ const noteAiDataSchema = mongoose.Schema(
     summary: String,
     tags: {
       type: [String],
-      enum: [
-        "lecture",
-        "assignment",
-        "important",
-        "exam",
-        "project",
-        "todo",
-        "meeting",
-        "idea",
-        "code",
-        "research",
-        "summary",
-        "quote",
-        "personal",
-      ],
+      default: [],
     },
     noteId: {
       type: mongoose.Schema.Types.ObjectId,

@@ -47,21 +47,7 @@ interface aiData {
   createdAt: string;
   updatedAt?: string;
   summary?: string;
-  tags?: [
-    | "lecture"
-    | "assignment"
-    | "important"
-    | "exam"
-    | "project"
-    | "todo"
-    | "meeting"
-    | "idea"
-    | "code"
-    | "research"
-    | "summary"
-    | "quote"
-    | "personal"
-  ];
+  tags?: [string];
 }
 export interface Note {
   file?: File | null;

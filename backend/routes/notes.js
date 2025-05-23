@@ -237,6 +237,24 @@ router.post("/:id/share", verifyToken, async (req, res) => {
   });
 });
 
+router.patch("/:id/share/remove", verifyToken, async (req, res) => {
+  console.log(req.params.id);
+  const { id } = req.params;
+  const sharedNotes = await note.findByIdAndUpdate(
+    id,
+    {
+      visibility: "private",
+    },
+    { new: true }
+  );
+  if (!sharedNotes) return res.status(400).json({ message: "Notes not Found" });
+  console.log(sharedNotes);
+  return res.status(200).json({
+    message: "Link Sharing Stopped",
+    visibility: sharedNotes.visibility,
+  });
+});
+
 router.get("/shared/:shareId/", async (req, res) => {
   const { shareId } = req.params;
   // console.log(shareId);
@@ -250,6 +268,11 @@ router.get("/shared/:shareId/", async (req, res) => {
     new Date(sharedNotes.sharedUntil).getTime() < Date.now()
   ) {
     return res.status(410).json({ message: "Sharing Link is expired" });
+  }
+  if (sharedNotes.visibility === "private") {
+    return res
+      .status(403)
+      .json({ message: "You do not have permission to access this note" });
   }
 
   return res.json({ message: "Fetched Notes successfully", sharedNotes });

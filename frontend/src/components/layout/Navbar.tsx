@@ -12,7 +12,7 @@ export default function Navbar() {
     function logout() {
         // Remove cookies
         document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie = "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        // document.cookie = "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         toast.success("Logged out successfully");
         navigate("/login");
     }
@@ -33,58 +33,61 @@ export default function Navbar() {
                 </div>
 
                 {/* Right: Desktop Nav */}
-                <div className="hidden sm:flex items-center gap-6">
-                    <button
-                        onClick={() => navigate("/notes")}
-                        className="text-sm font-medium text-gray-700 hover:text-black transition flex items-center gap-1"
-                    >
-                        <Home className="w-4 h-4" /> Home
-                    </button>
-                    <button
-                        onClick={() => navigate(`/${user?._id}/notes`)}
-                        className="text-sm font-medium text-gray-700 hover:text-black transition flex items-center gap-1"
-                    >
-                        <Users className="w-4 h-4" /> Realtime Notes
-                    </button>
+                {user && (
+                    <div className="hidden sm:flex items-center gap-6">
+                        <button
+                            onClick={() => navigate("/notes")}
+                            className="text-sm font-medium text-gray-700 hover:text-black transition flex items-center gap-1"
+                        >
+                            <Home className="w-4 h-4" /> Home
+                        </button>
+                        <button
+                            onClick={() => navigate(`/${user?._id}/notes`)}
+                            className="text-sm font-medium text-gray-700 hover:text-black transition flex items-center gap-1"
+                        >
+                            <Users className="w-4 h-4" /> Realtime Notes
+                        </button>
 
-                    {/* User Avatar */}
-                    <div className="relative group">
-                        {user?.avatarUrl ? (
-                            <img
-                                src={user.avatarUrl}
-                                alt="Avatar"
-                                className="w-10 h-10 rounded-full object-cover border border-gray-300 shadow cursor-pointer"
-                            />
-                        ) : (
-                            <div className="w-10 h-10 rounded-full bg-gray-300 text-white font-bold flex items-center justify-center shadow cursor-pointer">
-                                {user?.username?.[0]?.toUpperCase()}
-                            </div>
-                        )}
+                        {/* User Avatar */}
+                        <div className="relative group">
+                            {user?.avatarUrl ? (
+                                <img
+                                    src={user.avatarUrl}
+                                    alt="Avatar"
+                                    className="w-10 h-10 rounded-full object-cover border border-gray-300 shadow cursor-pointer"
+                                />
+                            ) : (
+                                <div className="w-10 h-10 rounded-full bg-gray-300 text-white font-bold flex items-center justify-center shadow cursor-pointer">
+                                    {user?.username?.[0]?.toUpperCase()}
+                                </div>
+                            )}
 
-                        {/* Dropdown */}
-                        <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg border rounded-lg hidden group-hover:block z-50">
-                            <div className="px-4 py-3 border-b">
-                                <p className="text-sm font-medium text-gray-800">
-                                    {user?.username}
-                                </p>
-                                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                            {/* Dropdown */}
+                            <div className="absolute right-0 mt-2 w-56 bg-white shadow-lg border rounded-lg hidden group-hover:block z-50">
+                                <div className="px-4 py-3 border-b">
+                                    <p className="text-sm font-medium text-gray-800">
+                                        {user?.username}
+                                    </p>
+                                    <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                                </div>
+                                <button
+                                    onClick={() => navigate("/profile")}
+                                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
+                                >
+                                    Profile
+                                </button>
+                                <button
+                                    onClick={logout}
+                                    className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-gray-100"
+                                >
+                                    Logout
+                                </button>
                             </div>
-                            <button
-                                onClick={() => navigate("/profile")}
-                                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
-                            >
-                                Profile
-                            </button>
-                            <button
-                                onClick={logout}
-                                className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-gray-100"
-                            >
-                                Logout
-                            </button>
                         </div>
                     </div>
-                </div>
+                )
 
+                }
                 {/* Mobile menu icon */}
                 <button
                     className="sm:hidden"
@@ -95,7 +98,7 @@ export default function Navbar() {
             </div>
 
             {/* Mobile menu dropdown */}
-            {mobileMenuOpen && (
+            {mobileMenuOpen && user && (
                 <div className="sm:hidden px-4 pb-4 pt-2 space-y-2 bg-white border-t border-gray-200">
                     <div className="flex flex-col gap-2">
                         <button

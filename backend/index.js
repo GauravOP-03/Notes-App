@@ -11,7 +11,7 @@ app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -84,7 +84,8 @@ io.on("connection", (socket) => {
     //   roomHosts[roomId] = roomUsers[roomId][0].uid;
     // }
     io.to(roomId).emit("hostInfo", { hostUid: roomHosts[roomId] });
-    io.to(roomId).emit("userJoined", { username, uid });
+    io.to(roomId).emit("userList", roomUsers[roomId]);
+    // io.to(roomId).emit("userJoined", { username, uid });
     // console.log(roomId)
   });
 
@@ -118,7 +119,7 @@ io.on("connection", (socket) => {
   socket.on("typing", ({ uid, username }) => {
     // console.log(username, uid);
     if (!lockRooms[socket.roomId] || socket.uid == roomHosts[socket.roomId]) {
-      io.to(socket.roomId).emit("show_typing", { uid, username });
+      socket.to(socket.roomId).emit("show_typing", { uid, username });
     } else {
       // console.log("updateTyping error");
       socket.emit("error", { message: "Note is locked" });
@@ -127,7 +128,7 @@ io.on("connection", (socket) => {
   socket.on("stop_typing", ({ uid }) => {
     if (!lockRooms[socket.roomId] || socket.uid == roomHosts[socket.roomId]) {
       // console.log(uid);
-      io.to(socket.roomId).emit("hide_typing", { uid });
+      socket.to(socket.roomId).emit("hide_typing", { uid });
     } else {
       // console.log("hideTyping error");
       socket.emit("error", { message: "Note is locked" });
