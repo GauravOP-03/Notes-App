@@ -121,8 +121,9 @@ const NotesController = () => {
     }
 
     return (
-        <div className="relative min-h-screen flex flex-col">
-            <main className="flex-1 pb-24">
+        <>
+
+            <main>
                 <AddNotes />
                 <AllNotes
                     onDelete={onDelete}
@@ -133,7 +134,8 @@ const NotesController = () => {
                 />
             </main>
             <Footer />
-        </div>
+        </>
+
 
     );
 };

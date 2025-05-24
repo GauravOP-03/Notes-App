@@ -2,13 +2,13 @@ import { Github, Twitter, Linkedin } from "lucide-react";
 
 export default function Footer() {
     return (
-        <footer className="bg-muted border-t py-10 px-4 text-sm text-gray-600">
+        <footer className="bg-white/70 border-t py-10 px-4 text-sm text-gray-600">
             <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
                 {/* Brand Info */}
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-800">Notely</h2>
+                    <h2 className="text-lg font-semibold text-gray-800">Notenest</h2>
                     <p className="mt-2 text-muted-foreground">
-                        Elegant, collaborative note-taking built for modern teams.
+                        The next-generation AI-powered collaborative note-taking platform that transforms how you capture, organize, and share ideas with seamless real-time collaboration.
                     </p>
                 </div>
 
@@ -17,9 +17,9 @@ export default function Footer() {
                     <h3 className="text-sm font-medium text-gray-800 mb-2">Quick Links</h3>
                     <ul className="space-y-1">
                         <li><a href="/" className="hover:underline">Home</a></li>
-                        <li><a href="/features" className="hover:underline">Features</a></li>
-                        <li><a href="/about" className="hover:underline">About</a></li>
-                        <li><a href="/contact" className="hover:underline">Contact</a></li>
+                        <li><a href="/" className="hover:underline">Features</a></li>
+                        <li><a href="/" className="hover:underline">About</a></li>
+                        <li><a href="/" className="hover:underline">Contact</a></li>
                     </ul>
                 </div>
 
@@ -27,9 +27,9 @@ export default function Footer() {
                 <div>
                     <h3 className="text-sm font-medium text-gray-800 mb-2">Legal</h3>
                     <ul className="space-y-1">
-                        <li><a href="/privacy" className="hover:underline">Privacy Policy</a></li>
-                        <li><a href="/terms" className="hover:underline">Terms of Service</a></li>
-                        <li><a href="/faq" className="hover:underline">FAQ</a></li>
+                        <li><a href="/" className="hover:underline">Privacy Policy</a></li>
+                        <li><a href="/" className="hover:underline">Terms of Service</a></li>
+                        <li><a href="/" className="hover:underline">FAQ</a></li>
                     </ul>
                 </div>
 
