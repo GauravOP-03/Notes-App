@@ -7,7 +7,7 @@ import axios from "axios";
 import { toast } from 'sonner'
 import { useNavigate } from "react-router-dom";
 import { BACKEND_URL } from "../../config"; // User's specified path
-import { registerUserSchema } from "@/types/schema"; // Ensure this path is correct
+import { registerUserSchema } from "zod-schemas/dist/schema"; // Ensure this path is correct
 import { ZodError } from "zod";
 import { motion } from "motion/react";
 import { UserPlus } from 'lucide-react'; // Icon for signup button

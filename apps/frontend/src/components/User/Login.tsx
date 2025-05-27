@@ -8,7 +8,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { BACKEND_URL } from "@/config";
 import { useAuth } from "@/context/AuthContext";
-import { loginUserSchema } from "@/types/schema"; // Ensure this path is correct
+import { loginUserSchema } from "zod-schemas/dist/schema"; // Ensure this path is correct
 import { ZodError } from "zod";
 import GoogleLogin from "./GoogleLogin"; // Ensure this path is correct
 import { motion } from "motion/react";
