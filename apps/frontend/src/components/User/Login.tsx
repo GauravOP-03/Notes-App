@@ -1,8 +1,5 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +7,11 @@ import { BACKEND_URL } from "@/config";
 import { useAuth } from "@/context/AuthContext";
 import { loginUserSchema } from "zod-schemas/dist/schema";
 import { ZodError } from "zod";
-import GoogleLogin from "./GoogleLogin";
+import UserCardHeader from "./userComponents/UserCardHeader";
+import AuthInput from "./userComponents/AuthInput";
+import SubmitButton from "./userComponents/SubmitButton";
+import SocialLogin from "./userComponents/SocialLogin";
+import AuthSwitch from "./userComponents/AuthSwitch";
 import { LogIn } from "lucide-react";
 
 export default function LoginForm() {
@@ -35,10 +36,6 @@ export default function LoginForm() {
     });
   };
 
-  function onSignupClick() {
-    navigate("/signup");
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -53,6 +50,7 @@ export default function LoginForm() {
       });
       navigate("/notes");
     } catch (error) {
+
       if (error instanceof ZodError) {
         const fieldErrors: Partial<typeof formData> = {};
         error.errors.forEach((err) => {
@@ -79,93 +77,46 @@ export default function LoginForm() {
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-blue-100 p-4 relative overflow-hidden">
       <div className="w-full max-w-md z-10">
         <Card className="bg-white shadow-2xl rounded-xl border border-gray-200 text-gray-800">
-          <CardHeader className="text-center p-6 md:p-8 border-b border-gray-200">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500">
-              Welcome Back
-            </h1>
-            <p className="text-sm text-gray-500 mt-2">
-              Sign in to continue to your dashboard.
-            </p>
-          </CardHeader>
+
+          <UserCardHeader
+            heading="Welcome Back"
+            content="Sign in to continue to your dashboard."
+          />
           <CardContent className="p-6 md:p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <Label htmlFor="email" className="text-gray-700 font-medium">
-                  Email Address
-                </Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="mt-1 bg-white border-gray-300 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 rounded-md shadow-sm"
-                />
-                {errors.email && (
-                  <p className="text-sm text-red-500 mt-1">{errors.email}</p>
-                )}
-              </div>
+
+              <AuthInput
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                error={errors.email}
+                label="Email Address"
+                className="mt-1 bg-white border-gray-300 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 rounded-md shadow-sm"
+              />
+
+              <AuthInput
+                id="password"
+                name="password"
+                type="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                error={errors.password}
+                label="Password"
+                className="mt-1 bg-white border-gray-300 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 rounded-md shadow-sm"
+              />
 
               <div>
-                <Label htmlFor="password" className="text-gray-700 font-medium">
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  className="mt-1 bg-white border-gray-300 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 rounded-md shadow-sm"
-                />
-                {errors.password && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {errors.password}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Button
-                  type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 text-base rounded-md transition-colors duration-300 ease-in-out transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
-                  disabled={loading}
-                >
-                  {loading ? "Logging in..." : <>
-                    <LogIn size={18} /> Login Securely
-                  </>}
-                </Button>
+                <SubmitButton loading={loading} text={"Login Securely"} loadingText={"Logging in..."} icon={<LogIn size={18} />} />
               </div>
             </form>
-
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-3 text-gray-500 rounded-full">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            <div className="flex justify-center">
-              <GoogleLogin />
-            </div>
-
-            <p className="text-center text-sm text-gray-500 mt-8">
-              Don't have an account?{" "}
-              <a
-                onClick={onSignupClick}
-                className="font-medium text-blue-600 hover:text-blue-500 hover:underline cursor-pointer"
-              >
-                Sign up now
-              </a>
-            </p>
+            <SocialLogin />
+            <AuthSwitch content={"Don't have an account?"} onSwitch={() => navigate("/signup")} />
           </CardContent>
         </Card>
       </div>
