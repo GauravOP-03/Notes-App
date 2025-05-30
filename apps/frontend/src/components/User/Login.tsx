@@ -8,46 +8,10 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { BACKEND_URL } from "@/config";
 import { useAuth } from "@/context/AuthContext";
-import { loginUserSchema } from "zod-schemas/dist/schema"; // Ensure this path is correct
+import { loginUserSchema } from "zod-schemas/dist/schema";
 import { ZodError } from "zod";
-import GoogleLogin from "./GoogleLogin"; // Ensure this path is correct
-import { motion } from "motion/react";
-import { LogIn } from 'lucide-react';
-
-// Variants for Framer Motion animations
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-    },
-  },
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut",
-    },
-  },
-};
+import GoogleLogin from "./GoogleLogin";
+import { LogIn } from "lucide-react";
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -59,7 +23,6 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
-
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -81,15 +44,12 @@ export default function LoginForm() {
     try {
       loginUserSchema.parse(formData); // Validate form data
       setLoading(true);
-      await axios.post(
-        `${BACKEND_URL}/login`,
-        formData,
-        { withCredentials: true }
-      );
+      await axios.post(`${BACKEND_URL}/login`, formData, {
+        withCredentials: true,
+      });
       await login(); // Update auth context
       toast.success("Login Successful", {
         description: "Welcome back! Redirecting...",
-
       });
       navigate("/notes");
     } catch (error) {
@@ -117,62 +77,19 @@ export default function LoginForm() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-blue-100 p-4 relative overflow-hidden">
-
-      {/* Subtle Animated Background Shapes - Light Theme */}
-      <motion.div
-        className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-300 rounded-full opacity-20 filter blur-3xl"
-        animate={{
-          scale: [1, 1.05, 1.02, 1.07, 1],
-          rotate: [0, 5, -3, 7, 0],
-        }}
-        transition={{
-          duration: 30, // Slower, more subtle movement
-          repeat: Infinity,
-          repeatType: "mirror",
-          ease: "easeInOut"
-        }}
-      />
-      <motion.div
-        className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-green-200 rounded-full opacity-15 filter blur-3xl"
-        animate={{
-          scale: [1, 1.08, 1.03, 1.06, 1],
-          rotate: [0, -5, 4, -6, 0],
-        }}
-        transition={{
-          duration: 35, // Slower, more subtle movement
-          repeat: Infinity,
-          repeatType: "mirror",
-          ease: "easeInOut"
-        }}
-      />
-
-      <motion.div
-        variants={cardVariants}
-        initial="hidden"
-        animate="visible"
-        className="w-full max-w-md z-10" // Ensure card is above shapes
-      >
+      <div className="w-full max-w-md z-10">
         <Card className="bg-white shadow-2xl rounded-xl border border-gray-200 text-gray-800">
           <CardHeader className="text-center p-6 md:p-8 border-b border-gray-200">
-            <motion.h1
-              variants={itemVariants}
-              className="text-3xl md:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500"
-            >
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500">
               Welcome Back
-            </motion.h1>
-            <motion.p variants={itemVariants} className="text-sm text-gray-500 mt-2">
+            </h1>
+            <p className="text-sm text-gray-500 mt-2">
               Sign in to continue to your dashboard.
-            </motion.p>
+            </p>
           </CardHeader>
           <CardContent className="p-6 md:p-8">
-            <motion.form
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              onSubmit={handleSubmit}
-              className="space-y-6"
-            >
-              <motion.div variants={itemVariants}>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
                 <Label htmlFor="email" className="text-gray-700 font-medium">
                   Email Address
                 </Label>
@@ -189,13 +106,10 @@ export default function LoginForm() {
                 {errors.email && (
                   <p className="text-sm text-red-500 mt-1">{errors.email}</p>
                 )}
-              </motion.div>
+              </div>
 
-              <motion.div variants={itemVariants}>
-                <Label
-                  htmlFor="password"
-                  className="text-gray-700 font-medium"
-                >
+              <div>
+                <Label htmlFor="password" className="text-gray-700 font-medium">
                   Password
                 </Label>
                 <Input
@@ -213,59 +127,48 @@ export default function LoginForm() {
                     {errors.password}
                   </p>
                 )}
-              </motion.div>
+              </div>
 
-              <motion.div variants={itemVariants}>
+              <div>
                 <Button
                   type="submit"
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 text-base rounded-md transition-colors duration-300 ease-in-out transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
                   disabled={loading}
                 >
-                  {loading ? (
-                    "Logging in..."
-                  ) : (
-                    <>
-                      <LogIn size={18} /> Login Securely
-                    </>
-                  )}
+                  {loading ? "Logging in..." : <>
+                    <LogIn size={18} /> Login Securely
+                  </>}
                 </Button>
-              </motion.div>
-            </motion.form>
+              </div>
+            </form>
 
-            <motion.div
-              variants={itemVariants}
-              className="relative my-8" // Increased margin for better separation
-            >
+            <div className="relative my-8">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-3 text-gray-500 rounded-full"> {/* bg-white ensures it covers the line */}
+                <span className="bg-white px-3 text-gray-500 rounded-full">
                   Or continue with
                 </span>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div variants={itemVariants} className="flex justify-center">
-              {/* Ensure GoogleLogin component fits this lighter theme */}
+            <div className="flex justify-center">
               <GoogleLogin />
-            </motion.div>
+            </div>
 
-            <motion.p
-              variants={itemVariants}
-              className="text-center text-sm text-gray-500 mt-8" // Increased margin
-            >
+            <p className="text-center text-sm text-gray-500 mt-8">
               Don't have an account?{" "}
               <a
                 onClick={onSignupClick}
-                className="font-medium text-blue-600 hover:text-blue-500 hover:underline"
+                className="font-medium text-blue-600 hover:text-blue-500 hover:underline cursor-pointer"
               >
                 Sign up now
               </a>
-            </motion.p>
+            </p>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     </div>
   );
 }

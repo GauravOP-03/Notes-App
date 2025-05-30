@@ -5,17 +5,41 @@ const user = require("../models/user");
 require("dotenv").config();
 const admin = require("../FirebaseAdmin");
 const router = express.Router();
-const verifyToken = require("./verifyToken");
+const { verifyToken } = require("./verify");
 const {
   registerUserSchema,
   loginUserSchema,
 } = require("zod-schemas/dist/schema");
+
+function createCookie(newUser) {
+  const payload = {
+    userId: newUser.id,
+    email: newUser.email,
+    avatarUrl: newUser.avatarUrl || null,
+    username: newUser.username,
+  };
+
+  const token = jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: "5d",
+  });
+
+  return {
+    token,
+    cookieOptions: {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Lax",
+      maxAge: 1000 * 60 * 60 * 24 * 5,
+    },
+  };
+}
 
 router.post("/signup", async (req, res) => {
   // console.log(req.body);
   const { username, email, password } = req.body;
   // Validate input
   const result = registerUserSchema.safeParse(req.body);
+  // console.log(result);
   if (!result.success) {
     return res
       .status(400)
@@ -36,8 +60,13 @@ router.post("/signup", async (req, res) => {
       password: hashedPassword,
       provider: "Email",
     });
-    await newUser.save();
+    const newCreatedUser = await newUser.save();
     // console.log(d);
+
+    // Generate JWT Token
+    const { token, cookieOptions } = createCookie(newCreatedUser);
+    // console.log(token);
+    res.cookie("token", token, cookieOptions);
 
     res.json({ message: "User registered successfully!" });
   } catch (error) {
@@ -70,26 +99,8 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
 
     // Generate JWT Token
-    const payload = {
-      userId: findUser.id,
-      email: findUser.email,
-      avatarUrl: findUser.avatarUrl,
-      username: findUser.username,
-    };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "5d",
-    });
-    // console.log(token);
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
-      maxAge: 1000 * 60 * 60 * 24 * 5,
-    });
-    // console.log("login cookie", req.cookies);
-    // console.log("Setting cookie:", token);
-    // console.log("Cookie headers:", res.getHeaders());
-    // console.log("Cookies in request:", req.cookies.token);
+    const { token, cookieOptions } = createCookie(findUser);
+    res.cookie("token", token, cookieOptions);
 
     res.json({ message: "User logged in successfully!" });
   } catch (error) {
@@ -98,13 +109,13 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/google-login", async (req, res) => {
-  const { token } = req.body;
+  const googleLoginToken = req.body.token;
   // console.log(token)
-  if (!token) {
+  if (!googleLoginToken) {
     return res.status(400).json({ message: "Token is required" });
   }
   try {
-    const decoded = await admin.auth().verifyIdToken(token);
+    const decoded = await admin.auth().verifyIdToken(googleLoginToken);
     // console.log(decoded);
     const { name, picture, email, uid } = decoded;
     const existingUser = await user.findOne({ email }).exec();
@@ -131,23 +142,9 @@ router.post("/google-login", async (req, res) => {
         });
       }
     }
-    const jwtToken = jwt.sign(
-      {
-        userId: googleUser._id,
-        email: googleUser.email,
-        avatarUrl: googleUser.avatarUrl,
-        username: googleUser.username,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "5d" }
-    );
 
-    res.cookie("token", jwtToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
-      maxAge: 1000 * 60 * 60 * 24 * 5,
-    });
+    const { token, cookieOptions } = createCookie(googleUser);
+    res.cookie("token", token, cookieOptions);
 
     // const userData = {
     //   _id: googleUser._id,

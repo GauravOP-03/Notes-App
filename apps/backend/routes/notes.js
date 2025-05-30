@@ -3,7 +3,7 @@ const multer = require("multer");
 const { storage, cloudinary } = require("../cloudConfig");
 const upload = multer({ storage });
 const note = require("../models/notes");
-const verifyToken = require("./verifyToken");
+const { verifyToken, verifyUser } = require("./verify");
 const noteAiData = require("../models/noteAiData");
 const router = express.Router();
 
@@ -60,23 +60,10 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
-router.delete("/:id/delete", verifyToken, async (req, res) => {
+router.delete("/:id/delete", verifyToken, verifyUser, async (req, res) => {
   const { id } = req.params;
   try {
     // console.log(req.params);
-    if (!id) {
-      return res.status(404).json({ message: "Note not Found" });
-    }
-
-    const noteToDelete = await note.findById(id).populate("owner").exec();
-    if (!noteToDelete) {
-      return res.status(404).json({ message: "Note not found" });
-    }
-    if (noteToDelete.owner._id.toString() !== req.user.userId) {
-      return res
-        .status(403)
-        .json({ message: "You are not authorized to delete this note" });
-    }
 
     await note.findByIdAndDelete(id);
     res.status(200).json({ message: "Deleted Successfully" });
@@ -85,54 +72,60 @@ router.delete("/:id/delete", verifyToken, async (req, res) => {
   }
 });
 
-router.put("/:id", verifyToken, upload.single("file"), async (req, res) => {
-  console.log("Edit request received");
-  console.log(req.file);
-  console.log(req.body);
-  try {
-    // Safely handle file upload
-    const image = req.file?.path || null;
-    console.log("Uploaded image path:", image);
+router.put(
+  "/:id",
+  verifyToken,
+  verifyUser,
+  upload.single("file"),
+  async (req, res) => {
+    console.log("Edit request received");
+    console.log(req.file);
+    console.log(req.body);
+    try {
+      // Safely handle file upload
+      const image = req.file?.path || null;
+      console.log("Uploaded image path:", image);
 
-    const { id } = req.params;
-    const { heading, noteBody, audioFile, transcribedText } = req.body;
+      const { id } = req.params;
+      const { heading, noteBody, audioFile, transcribedText } = req.body;
 
-    // Validate required fields
-    if (!id || !heading || !noteBody) {
-      return res.status(400).json({ message: "Missing required fields" });
+      // Validate required fields
+      if (!id || !heading || !noteBody) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Update the note
+      const updatedNote = await note.findByIdAndUpdate(
+        id,
+        {
+          // date: new Date(),
+          heading,
+          noteBody,
+          audioFile,
+          transcribedText,
+          ...(image && { $push: { image } }), // Only push image if it exists
+        },
+        { runValidators: true, new: true }
+      );
+
+      if (!updatedNote) {
+        return res.status(404).json({ message: "Note not found" });
+      }
+
+      // console.log("Updated note:", updatedNote);
+      res
+        .status(200)
+        .json({ message: "Note updated successfully", data: updatedNote });
+    } catch (error) {
+      console.error("Error updating note:", error.message);
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
     }
-
-    // Update the note
-    const updatedNote = await note.findByIdAndUpdate(
-      id,
-      {
-        // date: new Date(),
-        heading,
-        noteBody,
-        audioFile,
-        transcribedText,
-        ...(image && { $push: { image } }), // Only push image if it exists
-      },
-      { runValidators: true, new: true }
-    );
-
-    if (!updatedNote) {
-      return res.status(404).json({ message: "Note not found" });
-    }
-
-    // console.log("Updated note:", updatedNote);
-    res
-      .status(200)
-      .json({ message: "Note updated successfully", data: updatedNote });
-  } catch (error) {
-    console.error("Error updating note:", error.message);
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
   }
-});
+);
 
-router.delete("/:id/image", verifyToken, async (req, res) => {
+router.delete("/:id/image", verifyToken, verifyUser, async (req, res) => {
   const { img } = req.body;
   if (!img || !img.includes("/upload/"))
     return res.status(400).json({ error: "Invalid Cloudinary URL" });
@@ -176,7 +169,7 @@ router.delete("/:id/image", verifyToken, async (req, res) => {
   }
 });
 
-router.delete("/:id/voice", verifyToken, async (req, res) => {
+router.delete("/:id/voice", verifyToken, verifyUser, async (req, res) => {
   const { voice } = req.body;
   if (!voice || !voice.includes("/upload/"))
     return res.status(400).json({ error: "Invalid Cloudinary URL" });
@@ -211,7 +204,7 @@ router.delete("/:id/voice", verifyToken, async (req, res) => {
   }
 });
 
-router.post("/:id/share", verifyToken, async (req, res) => {
+router.post("/:id/share", verifyToken, verifyUser, async (req, res) => {
   const { id } = req.params;
   const { expireInHour } = req.body;
   // console.log(expireInHour);
@@ -237,7 +230,7 @@ router.post("/:id/share", verifyToken, async (req, res) => {
   });
 });
 
-router.patch("/:id/share/remove", verifyToken, async (req, res) => {
+router.patch("/:id/share/remove", verifyToken, verifyUser, async (req, res) => {
   console.log(req.params.id);
   const { id } = req.params;
   const sharedNotes = await note.findByIdAndUpdate(
@@ -278,7 +271,7 @@ router.get("/shared/:shareId/", async (req, res) => {
   return res.json({ message: "Fetched Notes successfully", sharedNotes });
 });
 
-router.get("/:id/summarize", verifyToken, async (req, res) => {
+router.get("/:id/summarize", verifyToken, verifyUser, async (req, res) => {
   const { id } = req.params;
   console.log(id);
   try {
@@ -336,7 +329,7 @@ router.get("/:id/summarize", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/:id/tags", verifyToken, async (req, res) => {
+router.get("/:id/tags", verifyToken, verifyUser, async (req, res) => {
   const { id } = req.params;
   try {
     const { tags } = require("../gemini/gemini");
