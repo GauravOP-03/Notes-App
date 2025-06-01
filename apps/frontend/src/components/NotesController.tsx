@@ -2,7 +2,7 @@ import { useNotes } from "@/context/NotesContext";
 import axios from "axios";
 import { BACKEND_URL } from "@/config";
 import AllNotes from "./notes/AllNotes";
-import AddNotes from "./notes/AddNotes";
+import AddNotes from "./notes/AddNotes/AddNotes";
 import { Note } from "@/types/schema";
 import { toast } from 'sonner';
 import { useSetNoteTags } from "./utils/useSetNoteTags";

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 
 import axios from "axios";
@@ -26,12 +26,12 @@ export default function SignupForm() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }));
+    }))
 
     if (errors[name as keyof typeof errors]) {
       setErrors((prev) => ({
@@ -40,15 +40,7 @@ export default function SignupForm() {
       }));
     }
 
-    // if ((name === "password" || name === "confirmPassword") && formData.password === formData.confirmPassword) {
-    //   if (name === "password" && value === formData.confirmPassword) {
-    //     setErrors((prev) => ({ ...prev, confirmPassword: "" }));
-    //   }
-    //   if (name === "confirmPassword" && value === formData.password) {
-    //     setErrors((prev) => ({ ...prev, confirmPassword: "" }));
-    //   }
-    // }
-  };
+  }, [errors]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,13 +111,13 @@ export default function SignupForm() {
               <AuthInput id="confirmPassword" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} placeholder="Re-enter your password" required error={errors.confirmPassword} label="Confirm Password" className="mt-1 bg-white border-gray-300 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-11 px-4 rounded-md shadow-sm" />
 
               <div className="pt-2">
-                <SubmitButton loading={loading} icon={<UserPlus size={18} />} text={"Create Account"} loadingText={"Creating Account..."} />
+                <SubmitButton loading={loading} icon={useMemo(() => <UserPlus size={18} />, [])} text={"Create Account"} loadingText={"Creating Account..."} />
               </div>
             </form>
 
             <SocialLogin />
 
-            <AuthSwitch onSwitch={() => navigate("/login")} content="Already have an account?" />
+            <AuthSwitch onSwitch={useCallback(() => navigate("/login"), [navigate])} content="Already have an account?" />
           </CardContent>
         </Card>
       </div>

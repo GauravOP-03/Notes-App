@@ -1,5 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { memo } from "react";
+
 interface AuthInputProps {
   id: string,
   name: string,
@@ -13,7 +15,7 @@ interface AuthInputProps {
   className: string
 }
 
-export default function AuthInput({
+function AuthInput({
   id,
   name,
   type,
@@ -42,4 +44,6 @@ export default function AuthInput({
     </div>
   );
 }
+
+export default memo(AuthInput);
 

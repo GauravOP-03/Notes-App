@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, MouseEvent } from "react";
+import React, { useState, useRef, useEffect, MouseEvent, memo } from "react";
 import { useReactMediaRecorder } from "react-media-recorder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,11 +21,11 @@ interface SpeechRecognition extends EventTarget {
   stop(): void;
   abort(): void;
   onresult:
-    | ((this: SpeechRecognition, event: SpeechRecognitionEvent) => void)
-    | null;
+  | ((this: SpeechRecognition, event: SpeechRecognitionEvent) => void)
+  | null;
   onerror:
-    | ((this: SpeechRecognition, event: SpeechRecognitionErrorEvent) => void)
-    | null;
+  | ((this: SpeechRecognition, event: SpeechRecognitionErrorEvent) => void)
+  | null;
 }
 
 interface SpeechRecognitionEvent extends Event {
@@ -60,14 +60,14 @@ declare global {
   interface Window {
     webkitSpeechRecognition: {
       prototype: SpeechRecognition;
-      new (): SpeechRecognition;
+      new(): SpeechRecognition;
     };
   }
   // Also declare SpeechRecognition in the global scope to support browsers that use the unprefixed version
   // eslint-disable-next-line no-var
   var SpeechRecognition: {
     prototype: SpeechRecognition;
-    new (): SpeechRecognition;
+    new(): SpeechRecognition;
   };
 }
 
@@ -216,4 +216,4 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onDataChange }) => {
   );
 };
 
-export default VoiceRecorder;
+export default memo(VoiceRecorder);

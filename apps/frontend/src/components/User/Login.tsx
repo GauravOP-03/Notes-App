@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import axios from "axios";
@@ -25,18 +25,19 @@ export default function LoginForm() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    setErrors({
-      ...errors,
-      [e.target.name]: "",
-    });
-  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+    setErrors((prev) => ({
+      ...prev,
+      [e.target.name]: "",
+    }));
+  }, []);
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       loginUserSchema.parse(formData); // Validate form data
@@ -71,7 +72,7 @@ export default function LoginForm() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [formData, login, navigate]);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-blue-100 p-4 relative overflow-hidden">
@@ -111,12 +112,12 @@ export default function LoginForm() {
                 className="mt-1 bg-white border-gray-300 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 rounded-md shadow-sm"
               />
 
-              <div>
-                <SubmitButton loading={loading} text={"Login Securely"} loadingText={"Logging in..."} icon={<LogIn size={18} />} />
-              </div>
+              {/* <div> */}
+              <SubmitButton loading={loading} text={"Login Securely"} loadingText={"Logging in..."} icon={useMemo(() => <LogIn size={18} />, [])} />
+              {/* </div> */}
             </form>
             <SocialLogin />
-            <AuthSwitch content={"Don't have an account?"} onSwitch={() => navigate("/signup")} />
+            <AuthSwitch content={"Don't have an account?"} onSwitch={useCallback(() => navigate("/signup"), [navigate])} />
           </CardContent>
         </Card>
       </div>

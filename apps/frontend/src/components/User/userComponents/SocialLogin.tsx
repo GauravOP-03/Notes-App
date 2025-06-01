@@ -1,6 +1,7 @@
+import { memo } from "react";
 import GoogleLogin from "../GoogleLogin"
 
-export default function SocialLogin() {
+function SocialLogin() {
     return (
         <>
             <div className="relative my-8">
@@ -19,3 +20,4 @@ export default function SocialLogin() {
         </>
     )
 }
+export default memo(SocialLogin);

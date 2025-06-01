@@ -1,9 +1,10 @@
+import { memo } from "react";
 
 interface AuthSwitchProp {
     onSwitch: () => void;
     content: string
 }
-export default function AuthSwitch({ onSwitch, content }: AuthSwitchProp) {
+function AuthSwitch({ onSwitch, content }: AuthSwitchProp) {
     return (
         <p className="text-center text-sm text-gray-500 mt-6">
             {content}{" "}
@@ -16,3 +17,4 @@ export default function AuthSwitch({ onSwitch, content }: AuthSwitchProp) {
         </p>
     )
 }
+export default memo(AuthSwitch);

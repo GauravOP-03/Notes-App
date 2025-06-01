@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { Menu, X, Home, Users, Feather, User, LogOut, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
-export default function Navbar() {
+function Navbar() {
     // Mock user data and functions for demo
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -19,10 +19,10 @@ export default function Navbar() {
         navigate("/login");
     }
 
-    const navItems = [
+    const navItems = useMemo(() => [
         { icon: Home, label: "Home", path: "/notes" },
         { icon: Users, label: "Realtime Notes", path: `/${user?._id}/notes` }
-    ];
+    ], [user?._id]);
 
     return (
         <header className="sticky top-0 z-40 w-full">
@@ -256,3 +256,5 @@ export default function Navbar() {
         </header>
     );
 }
+
+export default memo(Navbar);

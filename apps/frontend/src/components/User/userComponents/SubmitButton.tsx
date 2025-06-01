@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button"
+import { memo } from "react";
+
 
 interface SubmitButtonProps {
     loading: boolean,
@@ -7,7 +9,7 @@ interface SubmitButtonProps {
     loadingText: string,
 }
 
-export default function SubmitButton({
+function SubmitButton({
 
     loading,
     icon,
@@ -25,3 +27,4 @@ export default function SubmitButton({
         </Button>
     )
 }
+export default memo(SubmitButton);
