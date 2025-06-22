@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import io, { Socket } from "socket.io-client";
 import { toast } from "sonner";
 
@@ -44,12 +44,24 @@ export function useCollaborativeSocket(roomId: string, userId: string, username:
             setAllUser(users);
             console.log(users)
         });
+
+        // socketInstance.on("userList", (users) => {
+        //     setAllUser((prev) => {
+        //         const same =
+        //             users.length === prev.length &&
+        //             users.every((u: { uid: string; username: string; }, i: number) => u.uid === prev[i]?.uid && u.username === prev[i]?.username);
+
+        //         return same ? prev : users;
+        //     });
+        // });
         socketInstance.on("userLeft", ({ uid }) => {
             setAllUser((prev) => prev.filter(user => user.uid !== uid));
         });
 
-        socketInstance.on("updateText", (payload: { text: string }) => {
-            setText(payload.text);
+        socketInstance.on("updateText", (payload: { text: string, userId: string }) => {
+            if (payload.userId !== userId) {
+                setText(payload.text);
+            }
         });
 
         socketInstance.on("cursorPosition", (cursor: CursorData) => {
@@ -114,23 +126,23 @@ export function useCollaborativeSocket(roomId: string, userId: string, username:
         };
     }, [roomId, userId, username]);
 
-    const emitTextUpdate = (text: string) => {
+    const emitTextUpdate = useCallback((text: string) => {
         socket?.emit("updateText", { text });
-    };
+    }, [socket]);
 
-    const emitCursorUpdate = (position: number) => {
+    const emitCursorUpdate = useCallback((position: number) => {
         socket?.emit("updateCursor", { userId, position, username });
-    };
+    }, [socket, userId, username]);
 
-    const emitMessageUpdate = (message: string) => {
+    const emitMessageUpdate = useCallback((message: string) => {
         socket?.emit("chatMessage", {
             userId,
             username,
             message: message
         });
-    };
+    }, [socket, userId, username]);
 
-    const typingStatus = () => {
+    const typingStatus = useCallback(() => {
         if (!isTyping) {
             socket?.emit("typing", { uid: userId, username })
         }
@@ -141,17 +153,17 @@ export function useCollaborativeSocket(roomId: string, userId: string, username:
             setIsTyping(false);
             socket?.emit("stop_typing", { uid: userId })
         }, 1000)
-    }
+    }, [isTyping, socket, userId, username])
 
 
-    const lockNotes = () => {
+    const lockNotes = useCallback(() => {
         console.log("locknotes", locked)
         if (!locked) {
             socket?.emit("locked", { uid: userId });
         } else {
             socket?.emit("unlock", { uid: userId, });
         }
-    }
+    }, [locked, socket, userId])
 
 
     return { text, setText, cursors, emitTextUpdate, emitCursorUpdate, allUser, messages, emitMessageUpdate, typingStatus, typingUsers, host, lockNotes, locked, error };

@@ -8,10 +8,10 @@ import { Save, Share2, Loader2, Lock, Unlock } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { useCollaborativeSocket } from "@/hooks/useCollaborativeSocket";
-import { CursorOverlay } from "@/components/CursorOverlay";
+import { CursorOverlay } from "@/components/notes/collaborative/CursorOverlay";
 import { BACKEND_URL } from "@/config";
 import { useNotes } from "@/context/NotesContext";
-import { ChatArea } from "@/components/ChatArea";
+import ChatArea from "@/components/ChatArea";
 import Navbar from "@/components/layout/Navbar";
 import { toast } from "sonner";
 

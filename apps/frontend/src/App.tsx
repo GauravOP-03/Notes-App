@@ -2,7 +2,7 @@ import { lazy } from "react";
 const Error = lazy(() => import("./components/Error"));
 const NotesPage = lazy(() => import("./pages/NotesPage"));
 const MainPage = lazy(() => import("./pages/NoteNestLanding"));
-const RealtimeNotes = lazy(() => import("./pages/RealtimeNotes"));
+const RealTimeTextEditor = lazy(() => import("./components/notes/collaborative/RealTimeTextEditor"));
 const LoginForm = lazy(() => import("./components/User/Login"));
 const SignupForm = lazy(() => import("./components/User/SignUp"));
 const SharedNotePage = lazy(() => import("./components/notes/SharedNotePage"));
@@ -30,7 +30,7 @@ function App() {
       path: "/:id/notes",
       element: (
         <PrivateRoute>
-          <RealtimeNotes />
+          <RealTimeTextEditor />
         </PrivateRoute>
       ),
     },

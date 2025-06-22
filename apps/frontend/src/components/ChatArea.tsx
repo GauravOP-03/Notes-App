@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
 interface ChatMsg {
     userId: string;
@@ -12,7 +12,7 @@ interface ChatAreaProps {
     emitMessageUpdate: (message: string) => void;
 }
 
-export function ChatArea({ username, emitMessageUpdate, messages }: ChatAreaProps) {
+function ChatArea({ username, emitMessageUpdate, messages }: ChatAreaProps) {
     const [input, setInput] = useState("");
     const endRef = useRef<HTMLDivElement>(null);
 
@@ -76,3 +76,5 @@ export function ChatArea({ username, emitMessageUpdate, messages }: ChatAreaProp
         </div>
     );
 }
+
+export default memo(ChatArea);

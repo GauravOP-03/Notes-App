@@ -18,7 +18,7 @@ interface AllNotesProps {
   onSave: (updatedNote: Note) => Promise<void>;
   onShare: (noteId: string) => Promise<void>;
   summarize: (id: string) => Promise<void>;
-  onShareRemove: (noteId:string) =>Promise<void>;
+  onShareRemove: (noteId: string) => Promise<void>;
 }
 
 
