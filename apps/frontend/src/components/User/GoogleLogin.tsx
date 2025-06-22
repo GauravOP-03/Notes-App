@@ -33,8 +33,12 @@ export default function GoogleLogin() {
             navigate("/notes");
             console.log("Logged in via Firebase email");
         } catch (e) {
-            // console.log(e.response.data.message);
-            toast.error("Error logging in", { description: e.response.data.message || "Please try again later" });
+            // console.log(e);
+            let errorMessage = "Please try again later";
+            if (axios.isAxiosError(e) && e.response && e.response.data && typeof e.response.data.message === "string") {
+                errorMessage = e.response.data.message;
+            }
+            toast.error("Error logging in", { description: errorMessage });
         }
     }
 

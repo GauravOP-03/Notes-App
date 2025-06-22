@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { useSetNoteTags } from "./utils/useSetNoteTags";
 import Footer from "./layout/Footer";
 const NotesController = () => {
-    const { loading, notes, error, setNotes } = useNotes();
+    const { notes, setNotes } = useNotes();
 
     async function onDelete(id: string) {
         try {

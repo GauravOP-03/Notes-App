@@ -16,17 +16,19 @@ export const useSetNoteTags = () => {
 
       // Update notes state with new tags
       setNotes((prev: Note[]) =>
-        prev.map((note) =>
-          note._id === noteId
-            ? {
-                ...note,
-                aiData: {
-                  ...note.aiData,
-                  tags: tags,
-                },
-              }
-            : note
-        )
+        prev.map((note) => {
+          if (note._id !== noteId) return note;
+
+          if (!note.aiData) return note; // or throw an error, depending on your logic
+
+          return {
+            ...note,
+            aiData: {
+              ...note.aiData,
+              tags, // safely assign tags without touching createdAt/updatedAt
+            },
+          };
+        })
       );
 
       return tags;
