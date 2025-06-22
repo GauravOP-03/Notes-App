@@ -2,12 +2,12 @@ import { useState, useMemo, useEffect } from "react";
 import { motion } from "motion/react";
 import Masonry from 'react-masonry-css';
 import { useNotes } from "@/context/NotesContext";
-import { useAuth } from "@/context/AuthContext";
+// import { useAuth } from "@/context/AuthContext";
 import { Note } from "@/types/schema";
 import { NoteModal } from "@/components/modals/NoteModal";
 import NoteCard from "@/components/notes/NoteCard";
 import NotesSearchSort from "@/components/notes/NotesSearchSort";
-import FloatingActions from "@/components/layout/FloatingActions";
+// import FloatingActions from "@/components/layout/FloatingActions";
 import Navbar from "@/components/layout/Navbar";
 import NotesLoader from "../NotesLoader";
 import NotesEmpty from "../NotesEmpty";
@@ -36,7 +36,7 @@ export default function AllNotes({ onDelete, onSave, onShare, summarize, onShare
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const { notes, loading } = useNotes();
-  const { user } = useAuth();
+  // const { user } = useAuth();
 
   const filteredNotes = useMemo(() => {
     // Filter
@@ -141,7 +141,7 @@ export default function AllNotes({ onDelete, onSave, onShare, summarize, onShare
         )}
       </main>
 
-      {user && <FloatingActions userId={user._id} />}
+
 
       <NoteModal
         isOpen={isModalOpen}
