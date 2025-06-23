@@ -1,4 +1,5 @@
 import { Image, Trash2, ZoomIn } from "lucide-react";
+import { memo } from "react";
 
 interface ImageGalleryBoxProps {
     images: string[];
@@ -6,22 +7,23 @@ interface ImageGalleryBoxProps {
     onDelete: (img: string) => void;
 }
 
-export const ImageGalleryBox = ({ images, imagesToDelete, onDelete }: ImageGalleryBoxProps) => {
-    if (images.length === 0) return null;
+export const ImageGalleryBox = memo(({ images, imagesToDelete, onDelete }: ImageGalleryBoxProps) => {
+    const validImages = images.filter(Boolean) as string[];
+    if (validImages.length === 0) return null;
 
     return (
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
             <h3 className="flex items-center text-sm font-medium text-gray-700 mb-3">
                 <Image className="w-4 h-4 mr-2 text-violet-600" />
-                Images ({images.length})
+                Images ({validImages.length})
             </h3>
             <div className="grid grid-cols-1 gap-3">
-                {images.map((img, idx) => (
+                {validImages.map((img, idx) => (
                     <div
                         key={idx}
                         className={`relative rounded-lg overflow-hidden group aspect-video border-2 ${imagesToDelete.includes(img)
-                                ? "border-red-300 opacity-50"
-                                : "border-gray-200 hover:border-violet-300"
+                            ? "border-red-300 opacity-50"
+                            : "border-gray-200 hover:border-violet-300"
                             }`}
                     >
                         <img
@@ -65,4 +67,4 @@ export const ImageGalleryBox = ({ images, imagesToDelete, onDelete }: ImageGalle
             </div>
         </div>
     );
-};
+});

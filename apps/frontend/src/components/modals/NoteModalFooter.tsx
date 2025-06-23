@@ -1,13 +1,17 @@
 import { Pencil } from "lucide-react";
 import { Button } from "../ui/button";
+import { memo } from "react";
 
 interface NoteModalFooterProps {
     loading: boolean;
     handleSave: () => void;
     onClose: () => void;
+    isNoteDirty: boolean;
 }
 
-export const NoteModalFooter = ({ loading, handleSave, onClose }: NoteModalFooterProps) => {
+// import { memo } from "react";
+
+export const NoteModalFooter = memo(({ loading, handleSave, onClose, isNoteDirty }: NoteModalFooterProps) => {
     return (
         <div className="flex justify-end items-center gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/50 sticky bottom-0">
             <Button
@@ -19,7 +23,7 @@ export const NoteModalFooter = ({ loading, handleSave, onClose }: NoteModalFoote
             </Button>
             <Button
                 onClick={handleSave}
-                disabled={loading}
+                disabled={loading || !isNoteDirty}
                 className="px-6 h-10 bg-gray-900 hover:bg-gray-800 text-white transition-colors duration-200 disabled:opacity-50"
             >
                 {loading ? (
@@ -36,4 +40,5 @@ export const NoteModalFooter = ({ loading, handleSave, onClose }: NoteModalFoote
             </Button>
         </div>
     );
-};
+});
+

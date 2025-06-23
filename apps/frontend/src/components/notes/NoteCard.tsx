@@ -13,6 +13,7 @@ import {
 import { Button } from "../ui/button";
 import { Note } from "@/types/schema";
 import { toast } from "sonner";
+import { memo } from "react";
 // import { useState } from "react";
 
 interface Props {
@@ -23,7 +24,7 @@ interface Props {
     onShareRemove: (noteId: string) => Promise<void>;
 }
 
-export default function NoteCard({ note, onDelete, onClick, onShare, onShareRemove }: Props) {
+function NoteCard({ note, onDelete, onClick, onShare, onShareRemove }: Props) {
     // const [showSharedBox, setShowSharedBox] = useState(true);
     const validImages = note.image?.filter(Boolean) || [];
     const hasImages = validImages.length > 0;
@@ -190,3 +191,5 @@ export default function NoteCard({ note, onDelete, onClick, onShare, onShareRemo
         </Card>
     );
 }
+
+export default memo(NoteCard);

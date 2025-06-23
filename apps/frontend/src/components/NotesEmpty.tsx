@@ -1,4 +1,5 @@
 import { FileText, Plus, Sparkles } from "lucide-react";
+import { memo } from "react";
 // import { Button } from "@/components/ui/button";
 
 const NotesEmpty = () => {
@@ -97,4 +98,4 @@ const NotesEmpty = () => {
     );
 };
 
-export default NotesEmpty;
+export default memo(NotesEmpty);

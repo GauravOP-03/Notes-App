@@ -1,14 +1,18 @@
 import { X, FileText } from "lucide-react";
 import { Button } from "../ui/button";
-import { Note } from "@/types/schema";
+// import { Note } from "@/types/schema";
+import { memo } from "react";
 
 interface NoteModalHeaderProps {
-    editedNote: Note;
+    // editedNote: Note;
+    updatedAt: string;
+    heading: string;
     onClose: () => void;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const NoteModalHeader = ({ editedNote, onClose, onChange }: NoteModalHeaderProps) => {
+export const NoteModalHeader = memo(({ updatedAt, heading, onClose, onChange }: NoteModalHeaderProps) => {
+    console.log("component rerender")
     return (
         <div className="border-b border-gray-100 px-6 py-5 bg-gray-50/50 sticky top-0 z-10">
             <div className="flex items-center justify-between mb-3">
@@ -20,7 +24,7 @@ export const NoteModalHeader = ({ editedNote, onClose, onChange }: NoteModalHead
                         <h2 className="text-lg font-semibold text-gray-900">Edit Note</h2>
                         <p className="text-xs text-gray-500">
                             Last edited:{" "}
-                            {new Date(editedNote.updatedAt).toLocaleString("en-US", {
+                            {new Date(updatedAt).toLocaleString("en-US", {
                                 year: "numeric",
                                 month: "short",
                                 day: "numeric",
@@ -44,11 +48,11 @@ export const NoteModalHeader = ({ editedNote, onClose, onChange }: NoteModalHead
             <input
                 type="text"
                 name="heading"
-                value={editedNote.heading}
+                value={heading}
                 onChange={onChange}
                 placeholder="Note Title..."
                 className="w-full text-2xl font-semibold text-gray-900 bg-transparent outline-none placeholder-gray-400 border-b border-transparent focus:border-violet-400 transition-colors duration-200 pb-2"
             />
         </div>
     );
-};
+});

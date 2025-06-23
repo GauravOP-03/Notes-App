@@ -1,11 +1,12 @@
 import { Image } from "lucide-react";
+import { memo } from "react";
 
 interface UploadImageBoxProps {
     onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     previewFile?: File | null;
 }
 
-export const UploadImageBox = ({ onFileChange, previewFile }: UploadImageBoxProps) => {
+export const UploadImageBox = memo(({ onFileChange, previewFile }: UploadImageBoxProps) => {
     return (
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
             <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
@@ -45,4 +46,4 @@ export const UploadImageBox = ({ onFileChange, previewFile }: UploadImageBoxProp
             )}
         </div>
     );
-};
+});

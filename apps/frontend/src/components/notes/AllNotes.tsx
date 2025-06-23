@@ -1,17 +1,14 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import Masonry from "react-masonry-css";
 import { motion } from "motion/react";
-import Masonry from 'react-masonry-css';
 import { useNotes } from "@/context/NotesContext";
-// import { useAuth } from "@/context/AuthContext";
 import { Note } from "@/types/schema";
 import { NoteModal } from "@/components/modals/NoteModal";
 import NoteCard from "@/components/notes/NoteCard";
 import NotesSearchSort from "@/components/notes/NotesSearchSort";
-// import FloatingActions from "@/components/layout/FloatingActions";
 import Navbar from "@/components/layout/Navbar";
 import NotesLoader from "../NotesLoader";
 import NotesEmpty from "../NotesEmpty";
-// import { Toaster } from "../ui/sonner";
 
 interface AllNotesProps {
   onDelete: (id: string) => Promise<void>;
@@ -21,14 +18,19 @@ interface AllNotesProps {
   onShareRemove: (noteId: string) => Promise<void>;
 }
 
-
 const breakpointColumns = {
   default: 3,
   1100: 2,
-  700: 1
+  700: 1,
 };
 
-export default function AllNotes({ onDelete, onSave, onShare, summarize, onShareRemove }: AllNotesProps) {
+export default function AllNotes({
+  onDelete,
+  onSave,
+  onShare,
+  summarize,
+  onShareRemove,
+}: AllNotesProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,57 +38,69 @@ export default function AllNotes({ onDelete, onSave, onShare, summarize, onShare
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const { notes, loading } = useNotes();
-  // const { user } = useAuth();
+
+  const handleSearchQuery = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
+
+  const handleCardClick = useCallback((note: Note) => {
+    setSelectedNote(note);
+    setIsModalOpen(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedNote(null);
+  }, []);
 
   const filteredNotes = useMemo(() => {
-    // Filter
-    const filtered = notes.filter(
-      (note) =>
-        note.heading.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        note.noteBody.toLowerCase().includes(searchQuery.toLowerCase())
+    const filtered = notes.filter((note) =>
+      note.heading.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      note.noteBody.toLowerCase().includes(searchQuery.toLowerCase())
     );
-    // Sort
-    filtered.sort((a, b) => {
+
+    const sorted = [...filtered].sort((a, b) => {
       let aValue: string | number = "";
       let bValue: string | number = "";
-      if (sortField === "title") {
-        aValue = a.heading.toLowerCase();
-        bValue = b.heading.toLowerCase();
-      } else if (sortField === "created") {
-        aValue = new Date(a.createdAt).getTime();
-        bValue = new Date(b.createdAt).getTime();
-      } else if (sortField === "updated") {
-        aValue = new Date(a.updatedAt).getTime();
-        bValue = new Date(b.updatedAt).getTime();
+
+      switch (sortField) {
+        case "title":
+          aValue = a.heading.toLowerCase();
+          bValue = b.heading.toLowerCase();
+          break;
+        case "created":
+          aValue = new Date(a.createdAt).getTime();
+          bValue = new Date(b.createdAt).getTime();
+          break;
+        case "updated":
+        default:
+          aValue = new Date(a.updatedAt).getTime();
+          bValue = new Date(b.updatedAt).getTime();
       }
+
       if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
       if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
       return 0;
     });
-    return filtered;
+
+    return sorted;
   }, [notes, searchQuery, sortField, sortOrder]);
 
-  const handleCardClick = (note: Note) => {
-    setSelectedNote(note);
-    setIsModalOpen(true);
-    // console.log(note)
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedNote(null);
-  };
-
-  function handleSearchQuery(query: string): void {
-    setSearchQuery(query);
-  }
-
   useEffect(() => {
-    if (selectedNote) {
-      const updated = notes.find(n => n._id === selectedNote._id);
-      if (updated) setSelectedNote(updated);
-    }
-  }, [notes]);
+    if (!selectedNote) return;
+    const latest = notes.find((n) => n._id === selectedNote._id);
+    if (latest) setSelectedNote(latest);
+  }, [notes, selectedNote]);
+
+
+  const handleSortField = useCallback((field: string) => {
+    setSortField(field);
+  }, []);
+
+  const handleSortOrder = useCallback((order: "asc" | "desc") => {
+    setSortOrder(order);
+  }, []);
+
 
 
   return (
@@ -99,15 +113,16 @@ export default function AllNotes({ onDelete, onSave, onShare, summarize, onShare
             searchQuery={searchQuery}
             setSearchQuery={handleSearchQuery}
             sortField={sortField}
-            setSortField={setSortField}
+            setSortField={handleSortField}
             sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
+            setSortOrder={handleSortOrder}
           />
+
+
         </section>
       )}
 
       <main className="flex-1 px-6 pb-20">
-        {/* <Toaster /> */}
         {loading ? (
           <NotesLoader />
         ) : filteredNotes.length === 0 ? (
@@ -118,30 +133,33 @@ export default function AllNotes({ onDelete, onSave, onShare, summarize, onShare
             className="flex w-auto max-w-6xl mx-auto"
             columnClassName="pl-8 bg-clip-padding"
           >
-            {filteredNotes.map((note, idx) => (
-              <motion.div
-                key={note._id}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2, delay: idx * 0.05 }}
-                className="mb-8"
-              >
-                <NoteCard
-                  note={note}
-                  onDelete={onDelete}
-                  onClick={() => handleCardClick(note)}
-                  onShare={onShare}
-                  onShareRemove={onShareRemove}
-                />
-              </motion.div>
-            ))}
+            {filteredNotes.map((note, idx) => {
+              const handleClick = () => handleCardClick(note);
+
+              return (
+                <motion.div
+                  key={note._id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2, delay: idx * 0.05 }}
+                  className="mb-8"
+                >
+                  <NoteCard
+                    note={note}
+                    onDelete={onDelete}
+                    onClick={handleClick}
+                    onShare={onShare}
+                    onShareRemove={onShareRemove}
+                  />
+                </motion.div>
+              );
+            })}
+
           </Masonry>
         )}
       </main>
-
-
 
       <NoteModal
         isOpen={isModalOpen}

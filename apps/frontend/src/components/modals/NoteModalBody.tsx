@@ -85,7 +85,7 @@ export const NoteModalBody = memo(({
                     />
 
                     <ImageGalleryBox
-                        images={(image || []).filter(Boolean)}
+                        images={(image || [])}
                         imagesToDelete={imagesToDelete}
                         onDelete={markImageForDeletion}
                     />

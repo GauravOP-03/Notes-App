@@ -1,4 +1,5 @@
 import { Mic } from "lucide-react";
+import { memo } from "react";
 // import { Note } from "@/types/schema";
 
 interface TranscriptionBoxProps {
@@ -6,7 +7,7 @@ interface TranscriptionBoxProps {
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
-export const TranscriptionBox = ({ transcribedText, onChange }: TranscriptionBoxProps) => {
+export const TranscriptionBox = memo(({ transcribedText, onChange }: TranscriptionBoxProps) => {
   if (!transcribedText || transcribedText === "null") return null;
 
   return (
@@ -24,4 +25,4 @@ export const TranscriptionBox = ({ transcribedText, onChange }: TranscriptionBox
       />
     </div>
   );
-};
+});
