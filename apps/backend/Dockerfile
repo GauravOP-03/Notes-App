@@ -5,7 +5,7 @@ WORKDIR /app
 # COPY ./pnpm-workspace.yaml ./
 # COPY ./pnpm-lock.yaml ./
 # COPY ./package.json ./
-COPY..
+COPY ..
 
 RUN npm install -g pnpm
 RUN pnpm install --filter backend...
