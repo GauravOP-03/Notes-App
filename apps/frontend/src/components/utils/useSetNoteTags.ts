@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useNotes } from "../../context/NotesContext";
 import { Note } from "../../types/schema";
-import { BACKEND_URL } from "@/config";
+// import { BACKEND_URL } from "@/config";
 
 export const useSetNoteTags = () => {
   const { setNotes } = useNotes();
@@ -9,9 +9,12 @@ export const useSetNoteTags = () => {
   const setNoteTags = async (noteId: string) => {
     try {
       // Get tags from API
-      const response = await axios.get(`${BACKEND_URL}/notes/${noteId}/tags`, {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/notes/${noteId}/tags`,
+        {
+          withCredentials: true,
+        }
+      );
       const tags = response.data;
 
       // Update notes state with new tags

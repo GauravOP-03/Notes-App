@@ -6,7 +6,7 @@ import {
 
 import { auth } from "@/FirebaseConfig";
 import axios from "axios";
-import { BACKEND_URL } from "@/config";
+// import { BACKEND_URL } from "@/config";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -21,7 +21,7 @@ export default function GoogleLogin() {
         // Send to your backend to verify and generate YOUR JWT
         try {
 
-            await axios.post(`${BACKEND_URL}/google-login`, {
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/google-login`, {
                 token: firebaseToken,
             }, { withCredentials: true });
             //   localStorage.setItem("token", res.data.token);

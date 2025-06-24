@@ -9,7 +9,7 @@ import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { useCollaborativeSocket } from "@/hooks/useCollaborativeSocket";
 import { CursorOverlay } from "@/components/notes/collaborative/CursorOverlay";
-import { BACKEND_URL } from "@/config";
+// import { BACKEND_URL } from "@/config";
 import { useNotes } from "@/context/NotesContext";
 import ChatArea from "@/components/ChatArea";
 import Navbar from "@/components/layout/Navbar";
@@ -64,7 +64,7 @@ export default function RealTimeTextEditor() {
     setSaving(true);
     try {
       const res = await axios.post(
-        `${BACKEND_URL}/notes`,
+        `${import.meta.env.VITE_BACKEND_URL}/notes`,
         {
           heading: title,
           noteBody: text,

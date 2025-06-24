@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { BACKEND_URL } from "@/config";
+// import { BACKEND_URL } from "@/config";
 import { useAuth } from "@/context/AuthContext";
 import { loginUserSchema } from "zod-schemas/dist/schema";
 import { ZodError } from "zod";
@@ -39,10 +39,11 @@ export default function LoginForm() {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
       loginUserSchema.parse(formData); // Validate form data
       setLoading(true);
-      await axios.post(`${BACKEND_URL}/login`, formData, {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/login`, formData, {
         withCredentials: true,
       });
       await login(); // Update auth context

@@ -1,4 +1,4 @@
-import { BACKEND_URL } from "@/config";
+// import { BACKEND_URL } from "@/config";
 import { useEffect, useState } from 'react';
 import { UserProp } from "@/types/schema";
 import axios from "axios";
@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
     const [loading, setLoading] = useState(true);
 
     const login = async () => {
-        const res = await axios.get(`${BACKEND_URL}/me`, { withCredentials: true });
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/me`, { withCredentials: true });
         setUser(res.data);
     };
     const logout = () => {
@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
     };
 
     useEffect(() => {
-        axios.get(`${BACKEND_URL}/me`, { withCredentials: true })
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/me`, { withCredentials: true })
             .then(res => setUser(res.data))
             .catch(() => setUser(null))
             .finally(() => setLoading(false));

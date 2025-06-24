@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import axios from "axios";
 import { toast } from 'sonner';
 import { useNavigate } from "react-router-dom";
-import { BACKEND_URL } from "../../config";
+// import { BACKEND_URL } from "../../config";
 import { registerUserSchema } from "zod-schemas/dist/schema";
 import { ZodError } from "zod";
 import { UserPlus } from 'lucide-react';
@@ -55,7 +55,7 @@ export default function SignupForm() {
       registerUserSchema.parse(formData);
       setLoading(true);
 
-      await axios.post(`${BACKEND_URL}/signup`, {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/signup`, {
         username: formData.username,
         email: formData.email,
         password: formData.password,

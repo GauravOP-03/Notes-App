@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Note } from "@/types/schema";
 import axios from "axios";
-import { BACKEND_URL } from "@/config";
+// import { BACKEND_URL } from "@/config";
 
 export function useNoteModalState(
   note: Note | null,
@@ -101,17 +101,23 @@ export function useNoteModalState(
       // Delete selected images
       await Promise.all([
         ...imagesToDelete.map((img) =>
-          axios.delete(`${BACKEND_URL}/notes/${currentNote._id}/image`, {
-            data: { img },
-            withCredentials: true,
-          })
+          axios.delete(
+            `${import.meta.env.VITE_BACKEND_URL}/notes/${currentNote._id}/image`,
+            {
+              data: { img },
+              withCredentials: true,
+            }
+          )
         ),
         // Delete audio if flagged
         deleteAudio && note?.audioFile
-          ? axios.delete(`${BACKEND_URL}/notes/${currentNote._id}/voice`, {
-              data: { voice: note.audioFile },
-              withCredentials: true,
-            })
+          ? axios.delete(
+              `${import.meta.env.BACKEND_URL}/notes/${currentNote._id}/voice`,
+              {
+                data: { voice: note.audioFile },
+                withCredentials: true,
+              }
+            )
           : null,
       ]);
 

@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Pencil, Clock, Volume2, Image as ImageIcon, FileText, LogIn } from "lucide-react";
 import { Note } from "@/types/schema";
-import { BACKEND_URL } from "@/config";
+// import { BACKEND_URL } from "@/config";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import Navbar from "../layout/Navbar";
@@ -20,7 +20,7 @@ export default function SharedNotePage() {
     useEffect(() => {
         async function fetchNote() {
             try {
-                const res = await axios.get(`${BACKEND_URL}/notes/shared/${sharedId}`);
+                const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/notes/shared/${sharedId}`);
                 setNote(res.data.sharedNotes);
             } catch (err) {
                 if (axios.isAxiosError(err)) {
@@ -42,7 +42,7 @@ export default function SharedNotePage() {
         setSaving(true);
         try {
             await axios.post(
-                `${BACKEND_URL}/notes`,
+                `${import.meta.env.BACKEND_URL}/notes`,
                 {
                     heading: note?.heading,
                     noteBody: note?.noteBody,

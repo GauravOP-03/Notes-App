@@ -9,7 +9,7 @@ import { useCallback, useState, memo } from "react";
 import { useNotes } from "@/context/NotesContext";
 import { useSetNoteTags } from "../../utils/useSetNoteTags";
 import axios from "axios";
-import { BACKEND_URL } from "@/config";
+// import { BACKEND_URL } from "@/config";
 
 import NoteTitleInput from "./NoteTitleInput";
 import NoteImageUpload from "./NoteImageUpload";
@@ -59,7 +59,7 @@ const NoteForm = ({ onClose }: { onClose: () => void }) => {
             if (voiceData.transcribedText) data.append("transcribedText", voiceData.transcribedText);
             if (voiceData.audioFile) data.append("audioFile", voiceData.audioFile);
 
-            const res = await axios.post(`${BACKEND_URL}/notes`, data, {
+            const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/notes`, data, {
                 headers: { "Content-Type": "multipart/form-data" },
                 withCredentials: true
             });

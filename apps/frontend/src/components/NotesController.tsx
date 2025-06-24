@@ -1,7 +1,7 @@
 import { memo, useCallback } from "react";
 import { useNotes } from "@/context/NotesContext";
 import axios from "axios";
-import { BACKEND_URL } from "@/config";
+// import { BACKEND_URL } from "@/config";
 import AllNotes from "./notes/AllNotes";
 import AddNotes from "./notes/AddNotes/AddNotes";
 import { Note } from "@/types/schema";
@@ -21,7 +21,7 @@ const NotesController = () => {
 
     const onDelete = useCallback(async (id: string) => {
         try {
-            await axios.delete(`${BACKEND_URL}/notes/${id}/delete`, {
+            await axios.delete(`${import.meta.env.BACKEND_URL}/notes/${id}/delete`, {
                 withCredentials: true,
             });
 
@@ -37,7 +37,7 @@ const NotesController = () => {
         if (!id) return;
 
         try {
-            const response = await axios.put(`${BACKEND_URL}/notes/${id}`, editedData, {
+            const response = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/notes/${id}`, editedData, {
                 headers: { "Content-Type": "multipart/form-data" },
                 withCredentials: true,
             });
@@ -58,7 +58,7 @@ const NotesController = () => {
     const onShare = useCallback(async (noteId: string) => {
         try {
             const { data } = await axios.post(
-                `${BACKEND_URL}/notes/${noteId}/share`,
+                `${import.meta.env.VITE_BACKEND_URL}/notes/${noteId}/share`,
                 { expireInHour: "24" },
                 { withCredentials: true }
             );
@@ -88,7 +88,7 @@ const NotesController = () => {
     const onShareRemove = useCallback(async (noteId: string) => {
         try {
             const { data } = await axios.patch(
-                `${BACKEND_URL}/notes/${noteId}/share/remove`,
+                `${import.meta.env.VITE_BACKEND_URL}/notes/${noteId}/share/remove`,
                 {},
                 { withCredentials: true }
             );
@@ -112,7 +112,7 @@ const NotesController = () => {
 
     const summarize = useCallback(async (id: string) => {
         try {
-            const { data } = await axios.get(`${BACKEND_URL}/notes/${id}/summarize`, {
+            const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/notes/${id}/summarize`, {
                 withCredentials: true,
             });
 

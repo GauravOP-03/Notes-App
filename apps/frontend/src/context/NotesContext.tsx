@@ -5,7 +5,7 @@ import {
   useEffect,
   useContext,
 } from "react";
-import { BACKEND_URL } from "@/config";
+// import { BACKEND_URL } from "@/config";
 import axios from "axios";
 import { Note } from "@/types/schema";
 import { UserProp } from "@/types/schema";
@@ -37,7 +37,7 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
     }
     const fetchNotes = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/notes`, { withCredentials: true });
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/notes`, { withCredentials: true });
         // console.log(response)
         if (response.data?.data?.length > 0) {
           setNotes(response.data.data);

@@ -28,7 +28,7 @@ export function useCollaborativeSocket(roomId: string, userId: string, username:
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const socketInstance = io("http://localhost:3000");
+        const socketInstance = io(import.meta.env.VITE_BACKEND_URL_SOCKET);
         setSocket(socketInstance);
         socketInstance.emit("joinRoom", { roomId, uid: userId, username });
         // socketInstance.on("userJoined", (userData) => {
