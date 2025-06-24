@@ -12,4 +12,4 @@ RUN pnpm --filter zod-schemas build
 RUN pnpm install
 
 WORKDIR ./app/apps/backend
-CMD ["pnpm", "index.js"]
+CMD ["node", "index.js"]
