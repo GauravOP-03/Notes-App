@@ -1,5 +1,5 @@
 FROM node:20-alpine
-WORKDIR/app
+WORKDIR /app
 COPY ./apps/backend ./apps/backend
 COPY ./packages/zod-schemas ./packages/zod-schemas
 COPY ./pnpm-workspace.yaml ./
