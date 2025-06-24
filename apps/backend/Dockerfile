@@ -4,6 +4,7 @@ COPY ./apps/backend ./apps/backend
 COPY ./packages/zod-schemas ./packages/zod-schemas
 COPY ./pnpm-workspace.yaml ./
 COPY ./pnpm-lock.yaml ./
+COPY ./package.json ./
 
 RUN npm install -g pnpm
 RUN pnpm install --filter backend...
