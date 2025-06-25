@@ -44,18 +44,19 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/GauravOP-03/Notes-App.git
-cd Notes-App
+git clone https://github.com/GauravOP-03/Notenest.git
+cd Notenest
 
-# Install dependencies
+# Install dependencies across all workspaces
 pnpm install
 
-# Set environment variables
-cp .env.example .env
-# Then update the .env file with your own MongoDB URI, Firebase config, JWT secrets, etc.
+# Set up environment variables
+cp .envsample .env
+# Open .env and update values for MongoDB URI, Firebase config, JWT secrets, etc.
 
-# Run the app (both frontend & backend)
+# Run the entire monorepo (frontend + backend)
 pnpm dev
+
 ```
 
 ---
