@@ -83,7 +83,7 @@ This project is open source and available under the MIT License.
 
 ## 🌐 Live Demo
 
-> If deployed: https://notenest.dpdns.org/
+> https://notenest.dpdns.org/ 
 > Visit NoteNest
 
 ---
@@ -93,7 +93,7 @@ This project is open source and available under the MIT License.
 **Gaurav Kumar**
 
 * GitHub: [@GauravOP-03](https://github.com/GauravOP-03)
-* LinkedIn: [linkedin.com/in/your-profile](https://linkedin.com/in/gaurav-kumar-5813bb321)
+* LinkedIn: [Gaurav Kumar](https://linkedin.com/in/gaurav-kumar-5813bb321)
 
 ---
 
