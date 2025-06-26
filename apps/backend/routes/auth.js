@@ -19,17 +19,22 @@ function createCookie(newUser) {
     username: newUser.username,
   };
 
-  const token = jwt.sign(payload, process.env.JWT_SECRET, {
+  const accessToken = jwt.sign(payload, process.env.JWT_SECRET_ACCESS_TOKEN, {
+    expiresIn: "15m",
+  });
+
+  const refreshToken = jwt.sign(payload, process.env.JWT_SECRET_REFRESH_TOKEN, {
     expiresIn: "5d",
   });
 
   return {
-    token,
+    refreshToken,
+    accessToken,
     cookieOptions: {
       httpOnly: true,
       secure: true,
-      sameSite: "None",
-      maxAge: 1000 * 60 * 60 * 24 * 5,
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24 * 5, // 5 days
     },
   };
 }
@@ -64,11 +69,12 @@ router.post("/signup", async (req, res) => {
     // console.log(d);
 
     // Generate JWT Token
-    const { token, cookieOptions } = createCookie(newCreatedUser);
+    const { refreshToken, accessToken, cookieOptions } =
+      createCookie(newCreatedUser);
     // console.log(token);
-    res.cookie("token", token, cookieOptions);
+    res.cookie("refreshToken", refreshToken, cookieOptions);
 
-    res.json({ message: "User registered successfully!" });
+    res.json({ message: "User registered successfully!", accessToken });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server error" });
@@ -99,10 +105,10 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
 
     // Generate JWT Token
-    const { token, cookieOptions } = createCookie(findUser);
-    res.cookie("token", token, cookieOptions);
+    const { refreshToken, accessToken, cookieOptions } = createCookie(findUser);
+    res.cookie("refreshToken", refreshToken, cookieOptions);
 
-    res.json({ message: "User logged in successfully!" });
+    res.json({ message: "User logged in successfully!", accessToken });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -143,8 +149,8 @@ router.post("/google-login", async (req, res) => {
       }
     }
 
-    const { token, cookieOptions } = createCookie(googleUser);
-    res.cookie("token", token, cookieOptions);
+    const { refreshToken, accessToken, cookieOptions } = createCookie(findUser);
+    res.cookie("refreshToken", refreshToken, cookieOptions);
 
     // const userData = {
     //   _id: googleUser._id,
@@ -154,6 +160,7 @@ router.post("/google-login", async (req, res) => {
     // };
     return res.json({
       message: "User logged in successfully!",
+      accessToken,
     });
   } catch (e) {
     console.log(e);
@@ -185,6 +192,30 @@ router.get("/me", verifyToken, async (req, res) => {
   //     console.log(err);
   //     res.status(500).json({ message: "Server error" });
   //   });
+});
+
+router.post("/refresh-token", async (req, res) => {
+  const token = req.cookies.refreshToken;
+  // console.log(token);
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized access" });
+  }
+  console.log("TOKEN : ", process.env.JWT_SECRET_REFRESH_TOKEN);
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_REFRESH_TOKEN);
+    // console.log(decoded);
+    const userData = await user.findById(decoded.userId).exec();
+    if (!userData) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const { refreshToken, accessToken, cookieOptions } = createCookie(userData);
+    // res.cookie("refreshToken", refreshToken, cookieOptions);
+    console.log(accessToken);
+    res.json({ accessToken });
+  } catch (error) {
+    console.error("Refresh token error:", error);
+    res.status(401).json({ message: "Invalid or expired refresh token" });
+  }
 });
 
 module.exports = router;

@@ -63,7 +63,7 @@ router.get("/", verifyToken, async (req, res) => {
 router.delete("/:id/delete", verifyToken, verifyUser, async (req, res) => {
   const { id } = req.params;
   try {
-    // console.log(req.params);
+    console.log(req.params);
 
     await note.findByIdAndDelete(id);
     res.status(200).json({ message: "Deleted Successfully" });

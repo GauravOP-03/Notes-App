@@ -1,6 +1,6 @@
-import { memo, useCallback } from "react";
+import { memo, useCallback, useEffect } from "react";
 import { useNotes } from "@/context/NotesContext";
-import axios from "axios";
+// import axios from "axios";
 // import { BACKEND_URL } from "@/config";
 import AllNotes from "./notes/AllNotes";
 import AddNotes from "./notes/AddNotes/AddNotes";
@@ -8,9 +8,11 @@ import { Note } from "@/types/schema";
 import { toast } from "sonner";
 import { useSetNoteTags } from "./utils/useSetNoteTags";
 import Footer from "./layout/Footer";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "@/lib/axiosInstance";
 
 const NotesController = () => {
-    const { setNotes } = useNotes();
+    const { setNotes, error } = useNotes();
     const setNoteTags = useSetNoteTags();
 
     const showError = useCallback((message = "Something went wrong") => {
@@ -21,9 +23,7 @@ const NotesController = () => {
 
     const onDelete = useCallback(async (id: string) => {
         try {
-            await axios.delete(`${import.meta.env.BACKEND_URL}/notes/${id}/delete`, {
-                withCredentials: true,
-            });
+            await axiosInstance.delete(`${import.meta.env.VITE_BACKEND_URL}/notes/${id}/delete`);
 
             setNotes((prev) => prev.filter((note) => note._id !== id));
         } catch (error) {
@@ -37,9 +37,9 @@ const NotesController = () => {
         if (!id) return;
 
         try {
-            const response = await axios.put(`${import.meta.env.VITE_BACKEND_URL}/notes/${id}`, editedData, {
+            const response = await axiosInstance.put(`${import.meta.env.VITE_BACKEND_URL}/notes/${id}`, editedData, {
                 headers: { "Content-Type": "multipart/form-data" },
-                withCredentials: true,
+                // withCredentials: true,
             });
 
             const updatedNote = response.data.data;
@@ -57,10 +57,10 @@ const NotesController = () => {
 
     const onShare = useCallback(async (noteId: string) => {
         try {
-            const { data } = await axios.post(
+            const { data } = await axiosInstance.post(
                 `${import.meta.env.VITE_BACKEND_URL}/notes/${noteId}/share`,
                 { expireInHour: "24" },
-                { withCredentials: true }
+                // { withCredentials: true }
             );
 
             setNotes((prev) =>
@@ -87,10 +87,10 @@ const NotesController = () => {
 
     const onShareRemove = useCallback(async (noteId: string) => {
         try {
-            const { data } = await axios.patch(
+            const { data } = await axiosInstance.patch(
                 `${import.meta.env.VITE_BACKEND_URL}/notes/${noteId}/share/remove`,
                 {},
-                { withCredentials: true }
+                // { withCredentials: true }
             );
 
             setNotes((prev) =>
@@ -112,8 +112,8 @@ const NotesController = () => {
 
     const summarize = useCallback(async (id: string) => {
         try {
-            const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/notes/${id}/summarize`, {
-                withCredentials: true,
+            const { data } = await axiosInstance.get(`${import.meta.env.VITE_BACKEND_URL}/notes/${id}/summarize`, {
+                // withCredentials: true,
             });
 
             setNotes((prev) =>
@@ -136,6 +136,18 @@ const NotesController = () => {
             showError("Failed to summarize the note.");
         }
     }, [setNotes, showError]);
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (error) {
+            toast.error("Session expired. Please login again.", {
+                description: "You will be redirected to the login page.",
+            });
+
+            navigate("/login");
+
+        }
+    }, [error, navigate]);
 
     return (
         <>

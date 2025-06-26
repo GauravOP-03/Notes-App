@@ -6,10 +6,11 @@ import {
   useContext,
 } from "react";
 // import { BACKEND_URL } from "@/config";
-import axios from "axios";
+// import axios from "axios";
 import { Note } from "@/types/schema";
 import { UserProp } from "@/types/schema";
 import { useAuth } from "./AuthContext";
+import axiosInstance from "@/lib/axiosInstance";
 
 
 interface NotesContextType {
@@ -37,7 +38,7 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
     }
     const fetchNotes = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/notes`, { withCredentials: true });
+        const response = await axiosInstance.get(`${import.meta.env.VITE_BACKEND_URL}/notes`);
         // console.log(response)
         if (response.data?.data?.length > 0) {
           setNotes(response.data.data);

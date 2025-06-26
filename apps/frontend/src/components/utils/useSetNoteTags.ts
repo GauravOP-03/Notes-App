@@ -1,6 +1,7 @@
-import axios from "axios";
+// import axios from "axios";
 import { useNotes } from "../../context/NotesContext";
 import { Note } from "../../types/schema";
+import axiosInstance from "@/lib/axiosInstance";
 // import { BACKEND_URL } from "@/config";
 
 export const useSetNoteTags = () => {
@@ -9,7 +10,7 @@ export const useSetNoteTags = () => {
   const setNoteTags = async (noteId: string) => {
     try {
       // Get tags from API
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${import.meta.env.VITE_BACKEND_URL}/notes/${noteId}/tags`,
         {
           withCredentials: true,
