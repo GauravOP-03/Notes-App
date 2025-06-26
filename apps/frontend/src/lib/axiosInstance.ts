@@ -50,7 +50,7 @@ axiosInstance.interceptors.response.use(
           {},
           { withCredentials: true }
         );
-        console.log(refreshRes);
+        // console.log(refreshRes);
 
         const newAccessToken = refreshRes.data.accessToken;
         accessTokenRef.current = newAccessToken;

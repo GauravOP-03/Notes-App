@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
         } catch (e: unknown) {
             // console.log(e)
             if (axios.isAxiosError(e) && e.response?.status === 401) {
-                console.log("running")
+                // console.log("running")
                 try {
                     const refreshRes = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/refresh-token`, {}, { withCredentials: true });
                     console.log(refreshRes.data.accessToken)
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
                             Authorization: `Bearer ${accessToken.current}`
                         }
                     })
-                    console.log(res)
+                    // console.log(res)
                     setUser(res.data);
                 } catch (e: unknown) {
                     console.error("Refresh Token invalid", e);
