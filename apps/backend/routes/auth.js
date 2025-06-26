@@ -149,7 +149,8 @@ router.post("/google-login", async (req, res) => {
       }
     }
 
-    const { refreshToken, accessToken, cookieOptions } = createCookie(findUser);
+    const { refreshToken, accessToken, cookieOptions } =
+      createCookie(googleUser);
     res.cookie("refreshToken", refreshToken, cookieOptions);
 
     // const userData = {
