@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
                 // console.log("running")
                 try {
                     const refreshRes = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/refresh-token`, {}, { withCredentials: true });
-                    console.log(refreshRes.data.accessToken)
+                    // console.log(refreshRes.data.accessToken)
                     const newAccessToken = refreshRes.data.accessToken;
                     accessToken.current = newAccessToken;
                     const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/me`, {
@@ -46,8 +46,8 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
                     })
                     // console.log(res)
                     setUser(res.data);
-                } catch (e: unknown) {
-                    console.error("Refresh Token invalid", e);
+                } catch {
+                    console.warn("Refresh Token invalid");
                     setUser(null);
                 }
             } else {

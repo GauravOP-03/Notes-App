@@ -118,7 +118,7 @@ const NoteNestLanding = () => {
                 whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(139, 92, 246, 0.3)" }}
                 whileTap={{ scale: 0.95 }}
                 className="px-10 py-4 bg-violet-600 hover:bg-violet-700 text-white text-lg font-semibold rounded-xl shadow-lg transition-all duration-300 flex items-center gap-3"
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/signup?redirected=true')}
               >
                 Get Started Free
                 <ArrowRight className="w-5 h-5" />
@@ -128,7 +128,7 @@ const NoteNestLanding = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="px-10 py-4 border-2 border-gray-300 hover:border-violet-400 text-gray-700 hover:text-violet-600 text-lg font-semibold rounded-xl transition-all duration-300"
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/login?redirected=true')}
               >
                 Sign In
               </motion.button>
@@ -319,7 +319,7 @@ const NoteNestLanding = () => {
                 whileHover={{ scale: 1.05, boxShadow: "0 25px 50px rgba(139, 92, 246, 0.5)" }}
                 whileTap={{ scale: 0.95 }}
                 className="px-12 py-4 bg-violet-600 hover:bg-violet-700 text-white text-xl font-bold rounded-xl shadow-lg transition-all duration-300 flex items-center gap-3"
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/signup?redirected=true')}
               >
                 Start Free Trial
                 <Star className="w-6 h-6" />
@@ -329,7 +329,7 @@ const NoteNestLanding = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="px-12 py-4 border-2 border-white/30 hover:border-violet-400 text-white hover:text-violet-300 text-xl font-bold rounded-xl transition-all duration-300"
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/login?redirected=true')}
               >
                 Sign In
               </motion.button>

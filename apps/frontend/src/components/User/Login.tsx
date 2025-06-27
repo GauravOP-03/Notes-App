@@ -26,6 +26,7 @@ export default function LoginForm() {
   const navigate = useNavigate();
 
 
+
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
@@ -46,7 +47,16 @@ export default function LoginForm() {
       await axios.post(`${import.meta.env.VITE_BACKEND_URL}/login`, formData, {
         withCredentials: true,
       });
-      await login(); // Update auth context
+      try {
+        await login();
+
+      } catch (e) {
+        console.error("Login failed:", e);
+        toast.error("Login Failed", {
+          description: "An error occurred while logging in. Please try again.",
+        });
+        return;
+      }
       toast.success("Login Successful", {
         description: "Welcome back! Redirecting...",
       });

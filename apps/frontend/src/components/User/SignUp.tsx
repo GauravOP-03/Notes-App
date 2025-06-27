@@ -13,7 +13,7 @@ import SocialLogin from "./userComponents/SocialLogin";
 import SubmitButton from "./userComponents/SubmitButton";
 import UserCardHeader from "./userComponents/UserCardHeader";
 import AuthSwitch from "./userComponents/AuthSwitch";
-
+import { useAuth } from "@/context/AuthContext"
 export default function SignupForm() {
   const [formData, setFormData] = useState({
     username: "",
@@ -21,7 +21,7 @@ export default function SignupForm() {
     password: "",
     confirmPassword: "",
   });
-
+  const { login } = useAuth();
   const [errors, setErrors] = useState<Partial<typeof formData>>({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -61,6 +61,16 @@ export default function SignupForm() {
         password: formData.password,
         confirmPassword: formData.confirmPassword,
       }, { withCredentials: true });
+      try {
+        await login();
+
+      } catch (e) {
+        console.error("Login failed:", e);
+        toast.error("Login Failed", {
+          description: "An error occurred while logging in. Please try again.",
+        });
+        return;
+      }
 
       toast.success("Account Created!", {
         description: "Your account has been successfully created. ",

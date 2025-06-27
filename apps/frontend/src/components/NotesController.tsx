@@ -14,6 +14,19 @@ import axiosInstance from "@/lib/axiosInstance";
 const NotesController = () => {
     const { setNotes, error } = useNotes();
     const setNoteTags = useSetNoteTags();
+    // const { userFetchingError, loading } = useAuth();
+
+    const navigate = useNavigate()
+    useEffect(() => {
+        if (error) {
+            toast.error("Session expired. Please login again.", {
+                description: "You will be redirected to the login page.",
+            });
+
+            navigate("/login");
+
+        }
+    }, [error, navigate]);
 
     const showError = useCallback((message = "Something went wrong") => {
         toast.error(message, {
@@ -136,18 +149,9 @@ const NotesController = () => {
             showError("Failed to summarize the note.");
         }
     }, [setNotes, showError]);
-    const navigate = useNavigate()
 
-    useEffect(() => {
-        if (error) {
-            toast.error("Session expired. Please login again.", {
-                description: "You will be redirected to the login page.",
-            });
 
-            navigate("/login");
 
-        }
-    }, [error, navigate]);
 
     return (
         <>

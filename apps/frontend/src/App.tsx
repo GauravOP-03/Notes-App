@@ -12,6 +12,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { NotesProvider } from "./context/NotesContext";
 import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from "./routes/PrivateRoute";
+import LoginRoute from "./routes/LoginRoute"
 import { Toaster } from "sonner";
 
 function App() {
@@ -23,9 +24,9 @@ function App() {
 
       ),
     },
-    { path: "/notes", element: <NotesPage /> },
-    { path: "/signup", element: <SignupForm /> },
-    { path: "/login", element: <LoginForm /> },
+    { path: "/notes", element: <PrivateRoute><NotesPage /> </PrivateRoute> },
+    { path: "/signup", element: <LoginRoute><SignupForm /></LoginRoute> },
+    { path: "/login", element: <LoginRoute><LoginForm /></LoginRoute> },
     {
       path: "/:id/notes",
       element: (
