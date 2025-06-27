@@ -1,22 +1,30 @@
 import { memo, useMemo, useState } from "react";
-import { Menu, X, Home, Users, Feather, User, LogOut, Settings } from "lucide-react";
+import { Menu, X, Home, Users, Feather, User, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
+
 function Navbar() {
     // Mock user data and functions for demo
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
-
-
 
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
-    function logout() {
-        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        toast.success("Logged out successfully");
-        navigate("/login");
+    async function appLogout() {
+        try {
+
+            // await axiosInstance.post("/logout", {}, { withCredentials: true });
+            await logout();
+            toast.success("Logged out successfully", {
+                description: "You will be redirected to the home page.",
+            });
+            navigate("/")
+        } catch (e) {
+            console.error("Logout failed:", e);
+            toast.error("Failed to log out. Please try again.");
+        }
     }
 
     const navItems = useMemo(() => [
@@ -122,7 +130,7 @@ function Navbar() {
 
                                         {/* Menu Items */}
                                         <div className="relative py-2">
-                                            <button
+                                            {/* <button
                                                 onClick={() => {
                                                     navigate("/profile");
                                                     setProfileDropdownOpen(false);
@@ -131,8 +139,8 @@ function Navbar() {
                                             >
                                                 <User className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
                                                 <span>Profile Settings</span>
-                                            </button>
-                                            <button
+                                            </button> */}
+                                            {/* <button
                                                 onClick={() => {
                                                     navigate("/settings");
                                                     setProfileDropdownOpen(false);
@@ -141,11 +149,11 @@ function Navbar() {
                                             >
                                                 <Settings className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
                                                 <span>Preferences</span>
-                                            </button>
+                                            </button> */}
                                             <div className="border-t border-gray-100/50 my-2"></div>
                                             <button
                                                 onClick={() => {
-                                                    logout();
+                                                    appLogout();
                                                     setProfileDropdownOpen(false);
                                                 }}
                                                 className="group w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:text-red-700 hover:bg-red-50/50 transition-all duration-200"

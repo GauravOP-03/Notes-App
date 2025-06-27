@@ -127,7 +127,7 @@ export default function SignupForm() {
 
             <SocialLogin />
 
-            <AuthSwitch onSwitch={useCallback(() => navigate("/login"), [navigate])} content="Already have an account?" />
+            <AuthSwitch button={"Login"} onSwitch={useCallback(() => navigate("/login"), [navigate])} content="Already have an account?" />
           </CardContent>
         </Card>
       </div>

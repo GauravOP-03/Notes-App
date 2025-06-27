@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect } from "react";
+import { memo, useCallback } from "react";
 import { useNotes } from "@/context/NotesContext";
 // import axios from "axios";
 // import { BACKEND_URL } from "@/config";
@@ -8,25 +8,25 @@ import { Note } from "@/types/schema";
 import { toast } from "sonner";
 import { useSetNoteTags } from "./utils/useSetNoteTags";
 import Footer from "./layout/Footer";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/lib/axiosInstance";
 
 const NotesController = () => {
-    const { setNotes, error } = useNotes();
+    const { setNotes } = useNotes();
     const setNoteTags = useSetNoteTags();
     // const { userFetchingError, loading } = useAuth();
 
-    const navigate = useNavigate()
-    useEffect(() => {
-        if (error) {
-            toast.error("Session expired. Please login again.", {
-                description: "You will be redirected to the login page.",
-            });
+    // const navigate = useNavigate()
+    // useEffect(() => {
+    //     if (error) {
+    //         toast.error("Session expired. Please login again.", {
+    //             description: "You will be redirected to the login page.",
+    //         });
 
-            navigate("/login");
+    //         navigate("/login");
 
-        }
-    }, [error, navigate]);
+    //     }
+    // }, [error, navigate]);
 
     const showError = useCallback((message = "Something went wrong") => {
         toast.error(message, {

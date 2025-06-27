@@ -2,9 +2,10 @@ import { memo } from "react";
 
 interface AuthSwitchProp {
     onSwitch: () => void;
-    content: string
+    content: string;
+    button: string
 }
-function AuthSwitch({ onSwitch, content }: AuthSwitchProp) {
+function AuthSwitch({ onSwitch, content, button }: AuthSwitchProp) {
     return (
         <p className="text-center text-sm text-gray-500 mt-6">
             {content}{" "}
@@ -12,7 +13,7 @@ function AuthSwitch({ onSwitch, content }: AuthSwitchProp) {
                 onClick={onSwitch}
                 className="font-medium text-blue-600 hover:text-blue-500 hover:underline cursor-pointer"
             >
-                Login
+                {button}
             </span>
         </p>
     )

@@ -12,7 +12,7 @@ interface NoteModalHeaderProps {
 }
 
 export const NoteModalHeader = memo(({ updatedAt, heading, onClose, onChange }: NoteModalHeaderProps) => {
-    console.log("component rerender")
+    // console.log("component rerender")
     return (
         <div className="border-b border-gray-100 px-6 py-5 bg-gray-50/50 sticky top-0 z-10">
             <div className="flex items-center justify-between mb-3">

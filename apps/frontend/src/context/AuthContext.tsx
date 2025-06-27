@@ -9,7 +9,7 @@ interface AuthContextType {
     accessToken: React.RefObject<string | null>;
     loading: boolean;
     login: () => Promise<void>;
-    logout: () => void;
+    logout: () => Promise<void>;
 }
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -65,8 +65,20 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
         // setUser(res.data);
         await fetchUser();
     };
-    const logout = () => {
+    const logout = async () => {
+        await axios.post(
+            `${import.meta.env.VITE_BACKEND_URL}/logout`,
+            {}, // No body data
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken.current}`,
+                },
+                withCredentials: true,
+            }
+        );
+
         setUser(null);
+        accessToken.current = null;
     };
 
     useEffect(() => {

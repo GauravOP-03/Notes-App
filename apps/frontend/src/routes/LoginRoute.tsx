@@ -1,8 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { useEffect, useRef } from "react";
+
 
 interface LoginRouteProp {
     children: React.ReactNode;
@@ -10,18 +9,9 @@ interface LoginRouteProp {
 
 export default function LoginRoute({ children }: LoginRouteProp) {
     const { loading, user } = useAuth();
-    const hasShownToast = useRef(false);
     const location = useLocation();
     const redirected = new URLSearchParams(location.search).get("redirected");
 
-    useEffect(() => {
-        if (!loading && !user && !hasShownToast.current) {
-            toast.error("Session expired. Please login again.", {
-                description: "You will be redirected to the login page.",
-            });
-            hasShownToast.current = true;
-        }
-    }, [user, loading]);
 
     if (loading) {
         return (
