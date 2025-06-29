@@ -16,6 +16,7 @@ interface AllNotesProps {
   onShare: (noteId: string) => Promise<void>;
   summarize: (id: string) => Promise<void>;
   onShareRemove: (noteId: string) => Promise<void>;
+  summarizeImage: (url: string, id: string) => Promise<void>;
 }
 
 const breakpointColumns = {
@@ -30,6 +31,7 @@ export default function AllNotes({
   onShare,
   summarize,
   onShareRemove,
+  summarizeImage
 }: AllNotesProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
@@ -167,6 +169,7 @@ export default function AllNotes({
         note={selectedNote}
         onSave={onSave}
         summarize={summarize}
+        summarizeImage={summarizeImage}
       />
     </div>
   );

@@ -1,7 +1,6 @@
 import { memo, useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { useCollaborativeSocket } from "@/hooks/useCollaborativeSocket";
 // import { BACKEND_URL } from "@/config";
@@ -11,6 +10,7 @@ import Navbar from "@/components/layout/Navbar";
 import { toast } from "sonner";
 import Editor from "./Editor";
 import Toolbar from "./Toolbar";
+import axiosInstance from "@/lib/axiosInstance";
 // import Heading from "./Heading";
 
 function RealTimeTextEditor() {
@@ -37,38 +37,40 @@ function RealTimeTextEditor() {
         locked,
         host,
         error,
-        cursors
+        cursors,
+        textRef
     } = useCollaborativeSocket(id || "", userId, username);
 
 
     const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newText = e.target.value;
         setText(newText);
+        textRef.current = newText; // Update the textRef with the new text 
         typingStatus();
         emitTextUpdate(newText);
         emitCursorUpdate(e.target.selectionStart);
-    }, [emitCursorUpdate, emitTextUpdate, setText, typingStatus]);
+    }, [emitCursorUpdate, emitTextUpdate, setText, textRef, typingStatus]);
 
     const handleCursorMove = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
         emitCursorUpdate(e.target.selectionStart);
     }, [emitCursorUpdate]);
 
+
+
     const handleSaveNote = useCallback(async () => {
-        if (!text.trim() || !title.trim()) {
+        if (!textRef.current.trim() || !title.trim()) {
             toast.error("Please provide a title and some content.");
             return;
         }
         setSaving(true);
         try {
-            const res = await axios.post(
-                `${import.meta.env.VITE_BACKEND_URL}/notes`,
+            const res = await axiosInstance.post(`/notes`,
                 {
                     heading: title,
-                    noteBody: text,
+                    noteBody: textRef.current,
                     image: [],
                     audioFile: null,
                 },
-                { withCredentials: true }
             );
             setNotes((prevNotes) => [...prevNotes, res.data.data]);
             toast.success("Note saved successfully!");
@@ -78,7 +80,7 @@ function RealTimeTextEditor() {
         } finally {
             setSaving(false);
         }
-    }, []);
+    }, [setNotes, textRef, title]);
 
     const handleCopyLink = useCallback(async () => {
         try {

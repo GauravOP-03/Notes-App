@@ -26,6 +26,7 @@ export function useCollaborativeSocket(roomId: string, userId: string, username:
     const [host, setHost] = useState<string | null>(null);
     const [locked, setLocked] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const textRef = useRef<string>("");
 
     useEffect(() => {
         const socketInstance = io(import.meta.env.VITE_BACKEND_URL_SOCKET);
@@ -61,6 +62,7 @@ export function useCollaborativeSocket(roomId: string, userId: string, username:
         socketInstance.on("updateText", (payload: { text: string, userId: string }) => {
             if (payload.userId !== userId) {
                 setText(payload.text);
+                textRef.current = payload.text; // Update the textRef with the new text
             }
         });
 
@@ -166,5 +168,5 @@ export function useCollaborativeSocket(roomId: string, userId: string, username:
     }, [locked, socket, userId])
 
 
-    return { text, setText, cursors, emitTextUpdate, emitCursorUpdate, allUser, messages, emitMessageUpdate, typingStatus, typingUsers, host, lockNotes, locked, error };
+    return { text, setText,textRef, cursors, emitTextUpdate, emitCursorUpdate, allUser, messages, emitMessageUpdate, typingStatus, typingUsers, host, lockNotes, locked, error };
 }

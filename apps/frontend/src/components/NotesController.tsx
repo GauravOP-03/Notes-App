@@ -150,6 +150,50 @@ const NotesController = () => {
         }
     }, [setNotes, showError]);
 
+    const summarizeImage = useCallback(async (url: string, id: string) => {
+        try {
+            const { data } = await axiosInstance.post(
+                `${import.meta.env.VITE_BACKEND_URL}/notes/${id}/imageSummarize`,
+                { url }
+            );
+            // console.log(data.data)
+
+            // Get the exact image that was summarized
+            const images = data.data
+            const matchedImage = images.find((img: Record<string, string>) => img.url === url);
+            if (!matchedImage) {
+                console.warn("Image summary not found in response");
+                return;
+            }
+
+            setNotes((prev) =>
+                prev.map((note) => {
+                    if (note._id !== id) return note;
+
+                    const existingImages = note.aiData?.images || [];
+
+                    const filteredImages = existingImages.filter((img) => img.url !== url);
+
+                    return {
+                        ...note,
+                        aiData: {
+                            ...note.aiData,
+                            summary: note.aiData?.summary ?? "",
+                            tags: note.aiData?.tags ?? [],
+                            createdAt: note.aiData?.createdAt ?? new Date().toISOString(),
+                            updatedAt: new Date().toISOString(),
+                            images: [...filteredImages, matchedImage],
+                        },
+                    };
+                })
+            );
+        } catch (e) {
+            console.error("Error summarizing image:", e);
+            showError("Failed to summarize the image.");
+        }
+    }, [setNotes, showError]);
+
+
 
 
 
@@ -163,6 +207,7 @@ const NotesController = () => {
                     onShare={onShare}
                     summarize={summarize}
                     onShareRemove={onShareRemove}
+                    summarizeImage={summarizeImage}
                 />
             </main>
             <Footer />

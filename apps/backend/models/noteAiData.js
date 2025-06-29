@@ -11,7 +11,21 @@ const noteAiDataSchema = mongoose.Schema(
       ref: "Note",
       required: true,
     },
+
+    images: [
+      {
+        url: {
+          type: String,
+          required: true,
+        },
+        summary: {
+          type: String,
+          default: "",
+        },
+      },
+    ],
   },
+
   { timestamps: true }
 );
 

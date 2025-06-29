@@ -11,11 +11,12 @@ interface NoteModalProps {
   note: Note | null;
   onSave: (updatedNote: Note) => Promise<void>;
   summarize: (id: string) => Promise<void>;
+  summarizeImage: (url: string, id: string) => Promise<void>;
 }
 
 export const NoteModal = memo(
-  ({ isOpen, onClose, note, onSave, summarize }: NoteModalProps) => {
-    const state = useNoteModalState(note, onSave, summarize, onClose);
+  ({ isOpen, onClose, note, onSave, summarize, summarizeImage }: NoteModalProps) => {
+    const state = useNoteModalState(note, onSave, summarize, onClose, summarizeImage);
 
     // Optional: Close modal on Escape key press
     useEffect(() => {
@@ -69,6 +70,10 @@ export const NoteModal = memo(
               markImageForDeletion={state.markImageForDeletion}
               imagesToDelete={state.imagesToDelete}
               deleteAudio={state.deleteAudio}
+              imageInsight={state.imageInsight}
+              displayInsightLoading={state.displayInsightLoading}
+              displayImageInsight={state.displayImageInsight}
+
             />
 
             {/* Footer */}

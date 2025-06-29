@@ -6,7 +6,7 @@ const refreshToken = require("../models/refreshToken");
 require("dotenv").config();
 const admin = require("../FirebaseAdmin");
 const router = express.Router();
-const { verifyToken } = require("./verify");
+const { verifyToken } = require("../middleware/verify");
 const {
   registerUserSchema,
   loginUserSchema,
@@ -105,7 +105,7 @@ router.post("/signup", async (req, res) => {
     // Generate JWT Token
     const accessToken = generateAccessToken(newCreatedUser);
     const refreshToken = generateRefreshToken(newCreatedUser);
-    findRefreshToken(newCreatedUser.email, refreshToken, "upsertToken");
+    await findRefreshToken(newCreatedUser.email, refreshToken, "upsertToken");
     // console.log(token);
     res.cookie("refreshToken", refreshToken, cookieOptions);
 
@@ -191,12 +191,6 @@ router.post("/google-login", async (req, res) => {
     await findRefreshToken(email, refreshToken, "upsertToken");
     res.cookie("refreshToken", refreshToken, cookieOptions);
 
-    // const userData = {
-    //   _id: googleUser._id,
-    //   username: googleUser.username,
-    //   email: googleUser.email,
-    //   avatarUrl: googleUser.avatarUrl,
-    // };
     return res.json({
       message: "User logged in successfully!",
       accessToken,
@@ -219,31 +213,16 @@ router.get("/me", verifyToken, async (req, res) => {
   }
   const { password, ...userData } = existingUser._doc;
   res.json(userData);
-  // user
-  //   .findById(userId)
-  //   .then((userData) => {
-  //     console.log(userData)
-  //     if (!userData) return res.status(404).json({ message: "User not found" });
-  //     const { password, ...others } = userData._doc;
-  //     res.json(others);
-  //   })
-  //   .catch((err) => {
-  //     console.log(err);
-  //     res.status(500).json({ message: "Server error" });
-  //   });
 });
 
 router.post("/refresh-token", async (req, res) => {
   const token = req.cookies.refreshToken;
-  // console.log(token);
   if (!token) {
     return res.status(401).json({ message: "Unauthorized access" });
   }
 
-  // console.log("TOKEN : ", process.env.JWT_SECRET_REFRESH_TOKEN);
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_REFRESH_TOKEN);
-    // console.log(decoded);
     if (!(await findRefreshToken(decoded.email, token, "findToken"))) {
       return res
         .status(403)
@@ -255,8 +234,6 @@ router.post("/refresh-token", async (req, res) => {
     }
     // Generate new access token
     const accessToken = generateAccessToken(userData);
-    // res.cookie("refreshToken", refreshToken, cookieOptions);
-    // console.log(accessToken);
     res.json({ accessToken });
   } catch (error) {
     console.error("Refresh token error:", error);
@@ -266,8 +243,6 @@ router.post("/refresh-token", async (req, res) => {
 
 router.post("/logout", verifyToken, async (req, res) => {
   const token = req.cookies.refreshToken;
-  // console.log(req.cookies);
-  // console.log(token);
   if (!token) {
     return res.status(401).json({ message: "Unauthorized access not" });
   }
@@ -284,6 +259,59 @@ router.post("/logout", verifyToken, async (req, res) => {
   } catch (error) {
     console.error("Logout error:", error);
     res.status(500).json({ message: "Server error during logout" });
+  }
+});
+
+router.post("/forget-password", async (req, res) => {
+  const { sendPasswordResetEmail } = require("../utils/emailService");
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: "Email is required" });
+  try {
+    const existingUser = await user.findOne({ email });
+    if (!existingUser) {
+      return res.status(404).json({ message: "user not found" });
+    }
+    // if (!existingUser.provider !== "email") {
+    //   return res.status(400).json({
+    //     message: `You have already signed up using ${existingUser.provider}. Please use your ${existingUser.provider} account to log in.`,
+    //   });
+    // }
+    const resetToken = jwt.sign(
+      { userId: existingUser._id },
+      process.env.JWT_SECRET_RESET_PASSWORD,
+      { expiresIn: "15m" }
+    );
+
+    await sendPasswordResetEmail(email, resetToken);
+    res.json({ message: "Password reset link sent to your email" });
+  } catch (err) {
+    console.error("Forget password error:", err);
+    res.status(500).json({ message: "Server error during password reset" });
+  }
+});
+
+// reset password route
+router.post("/reset-password", async (req, res) => {
+  const { token, newPassword } = req.body;
+  if (!token || !newPassword) {
+    return res
+      .status(400)
+      .json({ message: "Token and new Password are required" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_RESET_PASSWORD);
+    const userToUpdate = await user.findById(decoded.userId);
+    if (!userToUpdate) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    userToUpdate.password = hashedPassword;
+    await userToUpdate.save();
+    res.json({ message: "Password reset successfully" });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ message: "Server error during password reset" });
   }
 });
 

@@ -1,13 +1,15 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Note } from "@/types/schema";
-import axios from "axios";
+// import axios from "axios";
+import axiosInstance from "@/lib/axiosInstance";
 // import { BACKEND_URL } from "@/config";
 
 export function useNoteModalState(
   note: Note | null,
   onSave: (updatedNote: Note) => Promise<void>,
   summarize: (id: string) => Promise<void>,
-  onClose: () => void
+  onClose: () => void,
+  imageSummarize: (url: string, id: string) => Promise<void>
 ) {
   // Editable note state
   const [editedNote, setEditedNote] = useState<Note | null>(note);
@@ -18,6 +20,11 @@ export function useNoteModalState(
 
   // Summary to display in UI
   const [displayedSummary, setDisplayedSummary] = useState("");
+
+  // summary of images
+  const [displayImageInsight, setDisplayImageInsights] = useState<
+    Record<string, string>
+  >({});
 
   // Track deletions (image and audio)
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
@@ -42,6 +49,8 @@ export function useNoteModalState(
     editedNoteRef.current = editedNote;
   }, [editedNote]);
 
+  const [displayInsightLoading, setDisplayInsightLoading] = useState(false);
+
   // Update displayed summary when AI-generated summary changes
   useEffect(() => {
     if (
@@ -51,7 +60,27 @@ export function useNoteModalState(
     ) {
       setDisplayedSummary(editedNote.aiData.summary);
     }
-  }, [editedNote?.aiData?.summary, summarizing, displayedSummary]);
+
+    if (
+      editedNote?.aiData?.images &&
+      editedNote.aiData.images.length > 0 &&
+      !displayInsightLoading
+    ) {
+      const imageInsights: Record<string, string> = {};
+      editedNote.aiData.images.forEach((img) => {
+        if (img.summary) {
+          imageInsights[img.url] = img.summary;
+        }
+      });
+      setDisplayImageInsights(imageInsights);
+    }
+  }, [
+    editedNote?.aiData?.summary,
+    summarizing,
+    displayedSummary,
+    editedNote?.aiData?.images,
+    displayInsightLoading,
+  ]);
 
   // Handle input or textarea change for text fields like title, noteBody, etc.
   const handleChange = useCallback(
@@ -101,21 +130,21 @@ export function useNoteModalState(
       // Delete selected images
       await Promise.all([
         ...imagesToDelete.map((img) =>
-          axios.delete(
-            `${import.meta.env.VITE_BACKEND_URL}/notes/${currentNote._id}/image`,
+          axiosInstance.delete(
+            `${import.meta.env.VITE_BACKEND_URL}/notes/${
+              currentNote._id
+            }/image`,
             {
               data: { img },
-              withCredentials: true,
             }
           )
         ),
         // Delete audio if flagged
         deleteAudio && note?.audioFile
-          ? axios.delete(
+          ? axiosInstance.delete(
               `${import.meta.env.BACKEND_URL}/notes/${currentNote._id}/voice`,
               {
                 data: { voice: note.audioFile },
-                withCredentials: true,
               }
             )
           : null,
@@ -147,6 +176,29 @@ export function useNoteModalState(
       setSummarizing(false);
     }
   }, [summarize]);
+
+  // const [imageInsightLoading, setImageInsightLoading] = useState(false);
+  const imageInsight = useCallback(
+    async (url: string) => {
+      const currentNote = editedNoteRef.current;
+      if (!currentNote) return;
+      setDisplayInsightLoading(true);
+      try {
+        await imageSummarize(url, currentNote._id);
+      } catch (e) {
+        console.error("error Summarizing image", e);
+      } finally {
+        setDisplayInsightLoading(false);
+      }
+    },
+    [imageSummarize]
+  );
+
+  const handleClose = useCallback(() => {
+    setImagesToDelete([]);
+    setDeleteAudio(false);
+    onClose();
+  }, [onClose]);
 
   // Mark an image for deletion and update state
   const markImageForDeletion = useCallback((img: string) => {
@@ -182,6 +234,9 @@ export function useNoteModalState(
     markAudioForDeletion,
     deleteAudio,
     imagesToDelete,
-    onClose,
+    onClose: handleClose,
+    imageInsight,
+    displayInsightLoading,
+    displayImageInsight,
   };
 }

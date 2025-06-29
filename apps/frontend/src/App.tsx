@@ -14,6 +14,8 @@ import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from "./routes/PrivateRoute";
 import LoginRoute from "./routes/LoginRoute"
 import { Toaster } from "sonner";
+import ForgetPassword from "./components/User/ForgetPassword";
+import ResetPassword from "./components/User/ResetPassword";
 
 function App() {
   const router = createBrowserRouter([
@@ -27,6 +29,8 @@ function App() {
     { path: "/notes", element: <PrivateRoute><NotesPage /> </PrivateRoute> },
     { path: "/signup", element: <LoginRoute><SignupForm /></LoginRoute> },
     { path: "/login", element: <LoginRoute><LoginForm /></LoginRoute> },
+    { path: "/forget-password", element: <ForgetPassword /> },
+    { path: "/reset-password", element: <ResetPassword /> },
     {
       path: "/:id/notes",
       element: (

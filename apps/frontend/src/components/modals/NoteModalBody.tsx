@@ -22,6 +22,10 @@ interface NoteModalBodyProps {
     markImageForDeletion: (img: string) => void;
     imagesToDelete: string[];
     deleteAudio: boolean;
+    imageInsight: (url: string) => Promise<void>;
+    displayInsightLoading: boolean;
+    displayImageInsight: Record<string, string>;
+
 }
 
 export const NoteModalBody = memo(({
@@ -40,6 +44,10 @@ export const NoteModalBody = memo(({
     markImageForDeletion,
     imagesToDelete,
     deleteAudio,
+    imageInsight,
+    displayInsightLoading,
+    displayImageInsight,
+
 }: NoteModalBodyProps) => {
     return (
         <div className="flex-1 overflow-y-auto bg-white">
@@ -88,6 +96,9 @@ export const NoteModalBody = memo(({
                         images={(image || [])}
                         imagesToDelete={imagesToDelete}
                         onDelete={markImageForDeletion}
+                        imageInsight={imageInsight}
+                        displayInsightLoading={displayInsightLoading}
+                        displayImageInsight={displayImageInsight}
                     />
 
                     <UploadImageBox

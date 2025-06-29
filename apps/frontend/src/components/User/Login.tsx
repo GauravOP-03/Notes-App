@@ -123,10 +123,25 @@ export default function LoginForm() {
                 className="mt-1 bg-white border-gray-300 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 rounded-md shadow-sm"
               />
 
-              {/* <div> */}
-              <SubmitButton loading={loading} text={"Login Securely"} loadingText={"Logging in..."} icon={useMemo(() => <LogIn size={18} />, [])} />
-              {/* </div> */}
+              {/* Forgot Password link */}
+              <div className="w-full flex justify-end -mt-4">
+                <button
+                  type="button"
+                  onClick={() => navigate("/forget-password")}
+                  className="text-sm text-blue-600 hover:underline font-medium"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+
+              <SubmitButton
+                loading={loading}
+                text={"Login Securely"}
+                loadingText={"Logging in..."}
+                icon={useMemo(() => <LogIn size={18} />, [])}
+              />
             </form>
+
             <SocialLogin />
             <AuthSwitch content={"Don't have an account?"} button={"Signup"} onSwitch={useCallback(() => navigate("/signup"), [navigate])} />
           </CardContent>

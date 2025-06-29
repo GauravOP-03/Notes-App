@@ -16,6 +16,31 @@ export const loginUserSchema = z.object({
     ),
 });
 
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .max(32, "Password must not exceed 32 characters")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/,
+        "Password must include uppercase, lowercase, number, and special character"
+      ),
+
+    confirmNewPassword: z.string().nonempty("Confirm Password is required"),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "Passwords must match",
+    path: ["confirmNewPassword"],
+  });
+
+export const forgetPasswordSchema = z.object({
+  email: z
+    .string()
+    .email("Invalid email address")
+    .nonempty("Email is required"),
+});
+
 export const registerUserSchema = z
   .object({
     username: z

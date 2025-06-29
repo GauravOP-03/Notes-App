@@ -3,7 +3,7 @@ const multer = require("multer");
 const { storage, cloudinary } = require("../cloudConfig");
 const upload = multer({ storage });
 const note = require("../models/notes");
-const { verifyToken, verifyUser } = require("./verify");
+const { verifyToken, verifyUser } = require("../middleware/verify");
 const noteAiData = require("../models/noteAiData");
 const router = express.Router();
 
@@ -63,7 +63,7 @@ router.get("/", verifyToken, async (req, res) => {
 router.delete("/:id/delete", verifyToken, verifyUser, async (req, res) => {
   const { id } = req.params;
   try {
-    console.log(req.params);
+    // console.log(req.params);
 
     await note.findByIdAndDelete(id);
     res.status(200).json({ message: "Deleted Successfully" });
@@ -78,13 +78,13 @@ router.put(
   verifyUser,
   upload.single("file"),
   async (req, res) => {
-    console.log("Edit request received");
-    console.log(req.file);
-    console.log(req.body);
+    // console.log("Edit request received");
+    // console.log(req.file);
+    // console.log(req.body);
     try {
       // Safely handle file upload
       const image = req.file?.path || null;
-      console.log("Uploaded image path:", image);
+      // console.log("Uploaded image path:", image);
 
       const { id } = req.params;
       const { heading, noteBody, audioFile, transcribedText } = req.body;
@@ -143,7 +143,7 @@ router.delete("/:id/image", verifyToken, verifyUser, async (req, res) => {
       )
       .select("image");
     if (!imgNote) return res.status(400).json({ error: "Cant find the Image" });
-    console.log(imgNote);
+    // console.log(imgNote);
     const imgSplit = img.split("/");
     const folderName = imgSplit[imgSplit.length - 2];
     const imgName = imgSplit[imgSplit.length - 1].split(".")[0];
@@ -231,7 +231,7 @@ router.post("/:id/share", verifyToken, verifyUser, async (req, res) => {
 });
 
 router.patch("/:id/share/remove", verifyToken, verifyUser, async (req, res) => {
-  console.log(req.params.id);
+  // console.log(req.params.id);
   const { id } = req.params;
   const sharedNotes = await note.findByIdAndUpdate(
     id,
@@ -241,7 +241,7 @@ router.patch("/:id/share/remove", verifyToken, verifyUser, async (req, res) => {
     { new: true }
   );
   if (!sharedNotes) return res.status(400).json({ message: "Notes not Found" });
-  console.log(sharedNotes);
+  // console.log(sharedNotes);
   return res.status(200).json({
     message: "Link Sharing Stopped",
     visibility: sharedNotes.visibility,
@@ -273,7 +273,7 @@ router.get("/shared/:shareId/", async (req, res) => {
 
 router.get("/:id/summarize", verifyToken, verifyUser, async (req, res) => {
   const { id } = req.params;
-  console.log(id);
+  // console.log(id);
   try {
     const { summarize } = require("../gemini/gemini");
     const findNotes = await note.findById(id).populate("owner").exec();
@@ -388,5 +388,54 @@ router.get("/:id/tags", verifyToken, verifyUser, async (req, res) => {
       .json({ message: "Internal server error", error: e.message });
   }
 });
+
+router.post(
+  "/:id/imageSummarize",
+  verifyToken,
+  verifyUser,
+  async (req, res) => {
+    const { id } = req.params;
+    const { url } = req.body;
+
+    if (!url) return res.status(400).json({ message: "Photo URL is required" });
+
+    try {
+      const { summarizeImage } = require("../gemini/gemini");
+      const findNotes = await note.findById(id).populate("owner").exec();
+
+      if (!findNotes) {
+        return res.status(404).json({ message: "Note not found" });
+      }
+
+      // Get the image summary using Gemini
+      const summary = await summarizeImage(url);
+
+      // Try to find existing AI data for this note
+      let aiDoc = await noteAiData.findOne({ noteId: id });
+
+      if (!aiDoc) {
+        // If not found, create a new document
+        aiDoc = new noteAiData({
+          noteId: id,
+          images: [{ url, summary }],
+        });
+      } else {
+        // If found, check if this image URL is already summarized
+        const existingImage = aiDoc.images.find((img) => img.url === url);
+        if (existingImage) {
+          existingImage.summary = summary; // Update summary
+        } else {
+          aiDoc.images.push({ url, summary }); // Add new image entry
+        }
+      }
+
+      const saved = await aiDoc.save();
+      res.status(200).json({ data: saved.images });
+    } catch (e) {
+      console.error("Error summarizing image:", e);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+);
 
 module.exports = router;
