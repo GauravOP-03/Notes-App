@@ -63,6 +63,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
     const login = async () => {
         // const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/me`, { withCredentials: true });
         // setUser(res.data);
+        accessToken.current = null;
         await fetchUser();
     };
     const logout = async () => {

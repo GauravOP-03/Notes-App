@@ -10,7 +10,9 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { useState } from "react";
 export default function GoogleLogin() {
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const { login } = useAuth();
     async function googleLogin() {
@@ -20,7 +22,7 @@ export default function GoogleLogin() {
 
         // Send to your backend to verify and generate YOUR JWT
         try {
-
+            setLoading(true);
             await axios.post(`${import.meta.env.VITE_BACKEND_URL}/google-login`, {
                 token: firebaseToken,
             }, { withCredentials: true });
@@ -39,21 +41,51 @@ export default function GoogleLogin() {
                 errorMessage = e.response.data.message;
             }
             toast.error("Error logging in", { description: errorMessage });
+        } finally {
+            setLoading(false);
         }
     }
 
     return (
         <button
             onClick={googleLogin}
-            className="flex items-center gap-3 bg-white border border-gray-300 rounded-lg px-5 py-2 shadow hover:shadow-md transition-all duration-200"
+            disabled={loading}
+            aria-label="Sign in with Google"
+            className="flex items-center justify-center gap-3 w-full px-5 py-2.5 bg-white border border-gray-300 rounded-lg shadow transition-all duration-200 hover:shadow-md active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-            <img
-                src="https://www.svgrepo.com/show/475656/google-color.svg"
-                alt="Google"
-                className="w-5 h-5"
-            />
-            <span className="text-sm font-medium text-gray-700">Sign in with Google</span>
+            {loading ? (
+                <svg
+                    className="animate-spin h-5 w-5 text-gray-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                    <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                    ></circle>
+                    <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8z"
+                    ></path>
+                </svg>
+            ) : (
+                <img
+                    src="https://www.svgrepo.com/show/475656/google-color.svg"
+                    alt="Google logo"
+                    className="w-5 h-5"
+                />
+            )}
+            <span className="text-sm font-semibold text-gray-700">
+                {loading ? "Signing in..." : "Sign in with Google"}
+            </span>
         </button>
+
 
     )
 }
