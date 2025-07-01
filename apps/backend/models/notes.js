@@ -19,6 +19,14 @@ const noteSchema = new mongoose.Schema(
       enum: ["public", "private"],
       default: "private",
     },
+    pinned: {
+      type: Boolean,
+      default: false,
+    },
+    archived: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

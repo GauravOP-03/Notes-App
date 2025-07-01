@@ -193,6 +193,30 @@ const NotesController = () => {
         }
     }, [setNotes, showError]);
 
+    const pinnedNotes = useCallback(async (id: string) => {
+        try {
+            const res = await axiosInstance.patch(`${import.meta.env.VITE_BACKEND_URL}/notes/${id}/pin`, {})
+            setNotes((prev) => {
+                return prev.map((note) => {
+                    if (note._id !== id) return note;
+                    return {
+                        ...note,
+                        pinned: !note.pinned
+                    };
+                });
+            })
+            // console.log(res.data.message)
+            toast.success("Note pin status updated!", {
+                description: res.data.message || "Notes pinned/unpinned successfully"
+            });
+        } catch (e) {
+            console.log(e)
+            toast.error("Failed to pin/unpin note.", {
+                description: "Please try again.",
+            });
+        }
+    }, [setNotes])
+
 
 
 
@@ -208,6 +232,7 @@ const NotesController = () => {
                     summarize={summarize}
                     onShareRemove={onShareRemove}
                     summarizeImage={summarizeImage}
+                    pinnedNotes={pinnedNotes}
                 />
             </main>
             <Footer />

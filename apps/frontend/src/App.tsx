@@ -6,7 +6,8 @@ const RealTimeTextEditor = lazy(() => import("./components/notes/collaborative/R
 const LoginForm = lazy(() => import("./components/User/Login"));
 const SignupForm = lazy(() => import("./components/User/SignUp"));
 const SharedNotePage = lazy(() => import("./components/notes/SharedNotePage"));
-
+const ForgetPassword = lazy(() => import("./components/User/ForgetPassword"));
+const ResetPassword = lazy(() => import("./components/User/ResetPassword"));
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { NotesProvider } from "./context/NotesContext";
@@ -14,8 +15,6 @@ import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from "./routes/PrivateRoute";
 import LoginRoute from "./routes/LoginRoute"
 import { Toaster } from "sonner";
-import ForgetPassword from "./components/User/ForgetPassword";
-import ResetPassword from "./components/User/ResetPassword";
 
 function App() {
   const router = createBrowserRouter([

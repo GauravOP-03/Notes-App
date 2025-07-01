@@ -17,6 +17,7 @@ interface AllNotesProps {
   summarize: (id: string) => Promise<void>;
   onShareRemove: (noteId: string) => Promise<void>;
   summarizeImage: (url: string, id: string) => Promise<void>;
+  pinnedNotes: (id: string) => Promise<void>;
 }
 
 const breakpointColumns = {
@@ -31,7 +32,9 @@ export default function AllNotes({
   onShare,
   summarize,
   onShareRemove,
-  summarizeImage
+  summarizeImage,
+  pinnedNotes
+
 }: AllNotesProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
@@ -56,12 +59,19 @@ export default function AllNotes({
   }, []);
 
   const filteredNotes = useMemo(() => {
-    const filtered = notes.filter((note) =>
-      note.heading.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.noteBody.toLowerCase().includes(searchQuery.toLowerCase())
+    const visibleNotes = notes.filter(
+      (note) =>
+        !note.archived && (
+          note.heading.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          note.noteBody.toLowerCase().includes(searchQuery.toLowerCase())
+        )
     );
 
-    const sorted = [...filtered].sort((a, b) => {
+    const sorted = [...visibleNotes].sort((a, b) => {
+      // Always show pinned notes on top
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+
       let aValue: string | number = "";
       let bValue: string | number = "";
 
@@ -87,6 +97,7 @@ export default function AllNotes({
 
     return sorted;
   }, [notes, searchQuery, sortField, sortOrder]);
+
 
   useEffect(() => {
     if (!selectedNote) return;
@@ -154,6 +165,7 @@ export default function AllNotes({
                     onClick={handleClick}
                     onShare={onShare}
                     onShareRemove={onShareRemove}
+                    pinnedNotes={pinnedNotes}
                   />
                 </motion.div>
               );

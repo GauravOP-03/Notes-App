@@ -438,4 +438,27 @@ router.post(
   }
 );
 
+router.patch("/:id/pin", verifyToken, verifyUser, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const noteDoc = await note.findById(id);
+    if (!noteDoc) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+    const updatedNote = await note.findByIdAndUpdate(
+      id,
+      { pinned: !noteDoc.pinned },
+      { new: true }
+    );
+    res.status(200).json({
+      message: `Note ${
+        updatedNote.pinned ? "pinned" : "unpinned"
+      } successfully`,
+    });
+  } catch (error) {
+    console.error("Error pinning note:", error.message);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;

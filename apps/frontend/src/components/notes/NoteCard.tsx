@@ -9,6 +9,7 @@ import {
     LinkIcon,
     Tag as TagIcon,
     X,
+    Pin, PinOff
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Note } from "@/types/schema";
@@ -22,9 +23,10 @@ interface Props {
     onClick: () => void;
     onShare: (noteId: string) => Promise<void>;
     onShareRemove: (noteId: string) => Promise<void>;
+    pinnedNotes: (id: string) => Promise<void>;
 }
 
-function NoteCard({ note, onDelete, onClick, onShare, onShareRemove }: Props) {
+function NoteCard({ note, onDelete, onClick, onShare, onShareRemove, pinnedNotes }: Props) {
     // const [showSharedBox, setShowSharedBox] = useState(true);
     const validImages = note.image?.filter(Boolean) || [];
     const hasImages = validImages.length > 0;
@@ -123,7 +125,23 @@ function NoteCard({ note, onDelete, onClick, onShare, onShareRemove }: Props) {
                         )}
                     </div>
 
+
                     <div className="flex items-center gap-1">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className={`h-7 w-7 rounded-lg transition-colors ${note.pinned
+                                    ? "text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50"
+                                    : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50"
+                                }`}
+                            title={note.pinned ? "Unpin note" : "Pin note"}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                pinnedNotes(note._id);
+                            }}
+                        >
+                            {note.pinned ? <Pin className="h-4 w-4 fill-yellow-400" /> : <PinOff className="h-4 w-4" />}
+                        </Button>
                         <Button
                             variant="ghost"
                             size="icon"
@@ -135,7 +153,6 @@ function NoteCard({ note, onDelete, onClick, onShare, onShareRemove }: Props) {
                         >
                             <Share2 className="h-4 w-4" />
                         </Button>
-
                         <Button
                             variant="ghost"
                             size="icon"
@@ -148,6 +165,7 @@ function NoteCard({ note, onDelete, onClick, onShare, onShareRemove }: Props) {
                             <Trash2 className="h-4 w-4" />
                         </Button>
                     </div>
+
                 </div>
 
                 {isShared && (

@@ -63,6 +63,8 @@ export interface Note {
   shareId?: string;
   visibility: "public" | "private";
   sharedUntil?: string;
+  pinned: boolean;
+  archived: boolean;
   aiData?: AiData;
 }
 
