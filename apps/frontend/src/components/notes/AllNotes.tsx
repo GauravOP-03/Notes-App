@@ -9,6 +9,7 @@ import NotesSearchSort from "@/components/notes/NotesSearchSort";
 import Navbar from "@/components/layout/Navbar";
 import NotesLoader from "../NotesLoader";
 import NotesEmpty from "../NotesEmpty";
+import ArchiveSheet from "../layout/ArchiveSheet";
 
 interface AllNotesProps {
   onDelete: (id: string) => Promise<void>;
@@ -122,16 +123,20 @@ export default function AllNotes({
 
       {notes.length > 0 && (
         <section className="max-w-6xl mx-auto w-full px-6 mt-10 mb-8">
-          <NotesSearchSort
-            searchQuery={searchQuery}
-            setSearchQuery={handleSearchQuery}
-            sortField={sortField}
-            setSortField={handleSortField}
-            sortOrder={sortOrder}
-            setSortOrder={handleSortOrder}
-          />
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <NotesSearchSort
+              searchQuery={searchQuery}
+              setSearchQuery={handleSearchQuery}
+              sortField={sortField}
+              setSortField={handleSortField}
+              sortOrder={sortOrder}
+              setSortOrder={handleSortOrder}
+            />
 
-
+            <ArchiveSheet onDelete={onDelete} onUnarchive={async (id) => {
+              await onSave({ ...notes.find(n => n._id === id)!, archived: false });
+            }} />
+          </div>
         </section>
       )}
 
@@ -166,6 +171,7 @@ export default function AllNotes({
                     onShare={onShare}
                     onShareRemove={onShareRemove}
                     pinnedNotes={pinnedNotes}
+                    onSave={onSave}
                   />
                 </motion.div>
               );

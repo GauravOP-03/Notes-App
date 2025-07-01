@@ -16,6 +16,7 @@ import PrivateRoute from "./routes/PrivateRoute";
 import LoginRoute from "./routes/LoginRoute"
 import { Toaster } from "sonner";
 
+
 function App() {
   const router = createBrowserRouter([
     {

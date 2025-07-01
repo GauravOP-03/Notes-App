@@ -1,4 +1,9 @@
-import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+} from "../ui/card";
 import {
     ImageIcon,
     MicIcon,
@@ -9,13 +14,14 @@ import {
     LinkIcon,
     Tag as TagIcon,
     X,
-    Pin, PinOff
+    Pin,
+    PinOff,
+    Archive,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Note } from "@/types/schema";
 import { toast } from "sonner";
 import { memo } from "react";
-// import { useState } from "react";
 
 interface Props {
     note: Note;
@@ -24,20 +30,26 @@ interface Props {
     onShare: (noteId: string) => Promise<void>;
     onShareRemove: (noteId: string) => Promise<void>;
     pinnedNotes: (id: string) => Promise<void>;
+    onSave: (note: Note) => Promise<void>; // using this for archive
 }
 
-function NoteCard({ note, onDelete, onClick, onShare, onShareRemove, pinnedNotes }: Props) {
-    // const [showSharedBox, setShowSharedBox] = useState(true);
+function NoteCard({
+    note,
+    onDelete,
+    onClick,
+    onShare,
+    onShareRemove,
+    pinnedNotes,
+    onSave,
+}: Props) {
     const validImages = note.image?.filter(Boolean) || [];
     const hasImages = validImages.length > 0;
 
-    const shareUrl = note.shareId
-        ? `${window.location.origin}/shared/${note.shareId}`
-        : null;
-
-    const isShared = note.visibility == "public" && note.shareId &&
-        note.sharedUntil &&
-        new Date(note.sharedUntil) > new Date();
+    const shareUrl =
+        note.shareId && note.visibility === "public" && note.sharedUntil &&
+            new Date(note.sharedUntil) > new Date()
+            ? `${window.location.origin}/shared/${note.shareId}`
+            : null;
 
     function handleCopy(e: React.MouseEvent) {
         e.stopPropagation();
@@ -54,10 +66,7 @@ function NoteCard({ note, onDelete, onClick, onShare, onShareRemove, pinnedNotes
             onClick={onClick}
             className="group relative bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-xl shadow-sm hover:shadow-lg hover:shadow-violet-500/5 transition-all duration-300 cursor-pointer break-inside-avoid overflow-hidden"
         >
-            {/* Subtle gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-violet-50/20 via-transparent to-gray-50/10 pointer-events-none" />
-
-            {/* Premium border accent */}
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-violet-400/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
             <CardHeader className="relative px-4 pt-4 pb-3">
@@ -125,8 +134,8 @@ function NoteCard({ note, onDelete, onClick, onShare, onShareRemove, pinnedNotes
                         )}
                     </div>
 
-
                     <div className="flex items-center gap-1">
+                        {/* Pin */}
                         <Button
                             variant="ghost"
                             size="icon"
@@ -140,8 +149,14 @@ function NoteCard({ note, onDelete, onClick, onShare, onShareRemove, pinnedNotes
                                 pinnedNotes(note._id);
                             }}
                         >
-                            {note.pinned ? <Pin className="h-4 w-4 fill-yellow-400" /> : <PinOff className="h-4 w-4" />}
+                            {note.pinned ? (
+                                <Pin className="h-4 w-4 fill-yellow-400" />
+                            ) : (
+                                <PinOff className="h-4 w-4" />
+                            )}
                         </Button>
+
+                        {/* Share */}
                         <Button
                             variant="ghost"
                             size="icon"
@@ -153,6 +168,8 @@ function NoteCard({ note, onDelete, onClick, onShare, onShareRemove, pinnedNotes
                         >
                             <Share2 className="h-4 w-4" />
                         </Button>
+
+                        {/* Delete */}
                         <Button
                             variant="ghost"
                             size="icon"
@@ -164,11 +181,24 @@ function NoteCard({ note, onDelete, onClick, onShare, onShareRemove, pinnedNotes
                         >
                             <Trash2 className="h-4 w-4" />
                         </Button>
-                    </div>
 
+                        {/* Archive */}
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Archive"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onSave({ ...note, archived: true });
+                            }}
+                        >
+                            <Archive className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
 
-                {isShared && (
+                {shareUrl && (
                     <div className="w-full bg-gradient-to-r from-violet-50 to-violet-100/50 text-violet-800 rounded-lg border border-violet-200/50 p-3">
                         <div className="flex justify-between items-start gap-3">
                             <div className="flex-1">
@@ -177,10 +207,12 @@ function NoteCard({ note, onDelete, onClick, onShare, onShareRemove, pinnedNotes
                                     Shared
                                 </div>
                                 <div className="text-xs text-violet-600 mb-2">
-                                    Expires: {note.sharedUntil && new Date(note.sharedUntil).toLocaleDateString("en-US", {
-                                        month: "short",
-                                        day: "numeric",
-                                    })}
+                                    Expires:{" "}
+                                    {note.sharedUntil &&
+                                        new Date(note.sharedUntil).toLocaleDateString("en-US", {
+                                            month: "short",
+                                            day: "numeric",
+                                        })}
                                 </div>
                                 <Button
                                     onClick={handleCopy}
@@ -197,7 +229,7 @@ function NoteCard({ note, onDelete, onClick, onShare, onShareRemove, pinnedNotes
                                 className="h-6 w-6 text-violet-400 hover:text-violet-600 hover:bg-violet-200/50 rounded-md transition-colors flex-shrink-0"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onShareRemove(note._id)
+                                    onShareRemove(note._id);
                                 }}
                             >
                                 <X className="h-3 w-3" />

@@ -87,7 +87,8 @@ router.put(
       // console.log("Uploaded image path:", image);
 
       const { id } = req.params;
-      const { heading, noteBody, audioFile, transcribedText } = req.body;
+      const { heading, noteBody, audioFile, transcribedText, archived } =
+        req.body;
 
       // Validate required fields
       if (!id || !heading || !noteBody) {
@@ -103,6 +104,7 @@ router.put(
           noteBody,
           audioFile,
           transcribedText,
+          archived,
           ...(image && { $push: { image } }), // Only push image if it exists
         },
         { runValidators: true, new: true }
