@@ -87,8 +87,7 @@ router.put(
       // console.log("Uploaded image path:", image);
 
       const { id } = req.params;
-      const { heading, noteBody, audioFile, transcribedText, archived } =
-        req.body;
+      const { heading, noteBody, audioFile, transcribedText } = req.body;
 
       // Validate required fields
       if (!id || !heading || !noteBody) {
@@ -104,7 +103,6 @@ router.put(
           noteBody,
           audioFile,
           transcribedText,
-          archived,
           ...(image && { $push: { image } }), // Only push image if it exists
         },
         { runValidators: true, new: true }
@@ -220,7 +218,8 @@ router.post("/:id/share", verifyToken, verifyUser, async (req, res) => {
       sharedUntil: sharedUntil,
       visibility: "public",
     },
-    { new: true }
+    { new: true },
+    { timestamps: false }
   );
   if (!updatedNote) return res.status(400).json({ message: "Notes not Found" });
   // console.log(updatedNote);
@@ -240,7 +239,8 @@ router.patch("/:id/share/remove", verifyToken, verifyUser, async (req, res) => {
     {
       visibility: "private",
     },
-    { new: true }
+    { new: true },
+    { timestamps: false }
   );
   if (!sharedNotes) return res.status(400).json({ message: "Notes not Found" });
   // console.log(sharedNotes);
@@ -450,7 +450,8 @@ router.patch("/:id/pin", verifyToken, verifyUser, async (req, res) => {
     const updatedNote = await note.findByIdAndUpdate(
       id,
       { pinned: !noteDoc.pinned },
-      { new: true }
+      { new: true },
+      { timestamps: false }
     );
     res.status(200).json({
       message: `Note ${
@@ -459,6 +460,30 @@ router.patch("/:id/pin", verifyToken, verifyUser, async (req, res) => {
     });
   } catch (error) {
     console.error("Error pinning note:", error.message);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.patch("/:id/archive", verifyToken, verifyUser, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const noteDoc = await note.findById(id);
+    if (!noteDoc) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+    const updatedNote = await note.findByIdAndUpdate(
+      id,
+      { archived: !noteDoc.archived },
+      { new: true },
+      { timestamps: false }
+    );
+    res.status(200).json({
+      message: `Note ${
+        updatedNote.archived ? "archived" : "unarchived"
+      } successfully`,
+    });
+  } catch (error) {
+    console.error("Error archiving note:", error.message);
     res.status(500).json({ message: error.message });
   }
 });

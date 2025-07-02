@@ -19,6 +19,7 @@ interface AllNotesProps {
   onShareRemove: (noteId: string) => Promise<void>;
   summarizeImage: (url: string, id: string) => Promise<void>;
   pinnedNotes: (id: string) => Promise<void>;
+  archivedNotes: (id: string) => Promise<void>;
 }
 
 const breakpointColumns = {
@@ -34,7 +35,8 @@ export default function AllNotes({
   summarize,
   onShareRemove,
   summarizeImage,
-  pinnedNotes
+  pinnedNotes,
+  archivedNotes
 
 }: AllNotesProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -133,9 +135,7 @@ export default function AllNotes({
               setSortOrder={handleSortOrder}
             />
 
-            <ArchiveSheet onDelete={onDelete} onUnarchive={async (id) => {
-              await onSave({ ...notes.find(n => n._id === id)!, archived: false });
-            }} />
+            <ArchiveSheet onDelete={onDelete} onUnarchive={archivedNotes} />
           </div>
         </section>
       )}
@@ -171,7 +171,7 @@ export default function AllNotes({
                     onShare={onShare}
                     onShareRemove={onShareRemove}
                     pinnedNotes={pinnedNotes}
-                    onSave={onSave}
+                    archivedNotes={archivedNotes}
                   />
                 </motion.div>
               );

@@ -30,7 +30,8 @@ interface Props {
     onShare: (noteId: string) => Promise<void>;
     onShareRemove: (noteId: string) => Promise<void>;
     pinnedNotes: (id: string) => Promise<void>;
-    onSave: (note: Note) => Promise<void>; // using this for archive
+    archivedNotes: (id: string) => Promise<void>;
+
 }
 
 function NoteCard({
@@ -40,7 +41,7 @@ function NoteCard({
     onShare,
     onShareRemove,
     pinnedNotes,
-    onSave,
+    archivedNotes
 }: Props) {
     const validImages = note.image?.filter(Boolean) || [];
     const hasImages = validImages.length > 0;
@@ -140,8 +141,8 @@ function NoteCard({
                             variant="ghost"
                             size="icon"
                             className={`h-7 w-7 rounded-lg transition-colors ${note.pinned
-                                    ? "text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50"
-                                    : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50"
+                                ? "text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50"
+                                : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50"
                                 }`}
                             title={note.pinned ? "Unpin note" : "Pin note"}
                             onClick={(e) => {
@@ -190,7 +191,7 @@ function NoteCard({
                             title="Archive"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                onSave({ ...note, archived: true });
+                                archivedNotes(note._id);
                             }}
                         >
                             <Archive className="h-4 w-4" />
