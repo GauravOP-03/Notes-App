@@ -210,7 +210,7 @@ const NoteNestLanding = () => {
       </section>
 
       {/* Additional Features */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-white features">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -293,7 +293,9 @@ const NoteNestLanding = () => {
 
       {/* CTA Section */}
       <section className="py-24 bg-gradient-to-br from-gray-900 to-black relative overflow-hidden">
+        {/* Violet gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-violet-600/10 to-transparent"></div>
+
         <div className="relative z-10 max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -305,26 +307,16 @@ const NoteNestLanding = () => {
               Ready to Transform Your Notes?
             </h2>
             <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed">
-              Join thousands of users who have revolutionized their productivity with Notenest's AI-powered collaborative platform.
+              Join thousands of users who have revolutionized their productivity with NoteNest's AI-powered collaborative platform.
             </p>
 
             <motion.div
-              className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+              className="flex justify-center items-center"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <motion.button
-                whileHover={{ scale: 1.05, boxShadow: "0 25px 50px rgba(139, 92, 246, 0.5)" }}
-                whileTap={{ scale: 0.95 }}
-                className="px-12 py-4 bg-violet-600 hover:bg-violet-700 text-white text-xl font-bold rounded-xl shadow-lg transition-all duration-300 flex items-center gap-3"
-                onClick={() => navigate('/signup?redirected=true')}
-              >
-                Start Free Trial
-                <Star className="w-6 h-6" />
-              </motion.button>
-
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -337,6 +329,7 @@ const NoteNestLanding = () => {
           </motion.div>
         </div>
       </section>
+
 
       {/* Footer */}
       <footer className="py-16 bg-white border-t border-gray-200">
@@ -355,10 +348,10 @@ const NoteNestLanding = () => {
               Transforming the way you think, collaborate, and create.
             </p>
             <div className="flex justify-center space-x-8 text-gray-500">
-              <a href="#" className="hover:text-violet-600 transition-colors font-medium">Privacy</a>
-              <a href="#" className="hover:text-violet-600 transition-colors font-medium">Terms</a>
-              <a href="#" className="hover:text-violet-600 transition-colors font-medium">Support</a>
-              <a href="#" className="hover:text-violet-600 transition-colors font-medium">Contact</a>
+              <a href="/#features" className="hover:text-violet-600 transition-colors font-medium">Features</a>
+              <a href="/about" className="hover:text-violet-600 transition-colors font-medium">About</a>
+              <a href="faq" className="hover:text-violet-600 transition-colors font-medium">FAQ</a>
+              <a href="/contact" className="hover:text-violet-600 transition-colors font-medium">Contact</a>
             </div>
           </div>
         </div>

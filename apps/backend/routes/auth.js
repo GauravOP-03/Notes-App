@@ -315,4 +315,21 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
+router.post("/contact", async (req, res) => {
+  const { sendContactMessage } = require("../utils/emailService");
+  const { name, email, message } = req.body;
+   if (!name || !email || !message) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  try{
+    await sendContactMessage(name, email, message);
+    res.json({ message: "Message sent successfully" });
+  } catch (err) {
+    console.error("Contact message error:", err);
+    res.status(500).json({ message: "Server error during contact message" });
+  }
+});
+  
+
 module.exports = router;

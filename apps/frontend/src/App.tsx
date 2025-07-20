@@ -15,6 +15,9 @@ import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from "./routes/PrivateRoute";
 import LoginRoute from "./routes/LoginRoute"
 import { Toaster } from "sonner";
+import ContactForm from "./components/ContactForm";
+import FAQSection from "./components/FAQSection";
+import AboutNoteNest from "./components/AboutNoteNest";
 
 
 function App() {
@@ -31,6 +34,9 @@ function App() {
     { path: "/login", element: <LoginRoute><LoginForm /></LoginRoute> },
     { path: "/forget-password", element: <ForgetPassword /> },
     { path: "/reset-password", element: <ResetPassword /> },
+    { path: "/contact", element: <ContactForm /> },
+    { path: "/faq", element: <FAQSection /> },
+    { path: "/about", element: <AboutNoteNest /> },
     {
       path: "/:id/notes",
       element: (

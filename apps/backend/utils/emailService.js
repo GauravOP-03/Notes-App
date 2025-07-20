@@ -52,4 +52,15 @@ async function sendPasswordResetEmail(to, token) {
   });
 }
 
-module.exports = { sendPasswordResetEmail };
+async function sendContactMessage(name, email, message) {
+  await transporter.sendMail({
+    from: `"${name}" <${email}>`,
+    to: process.env.EMAIL_USER,
+    subject: `New Contact Message from ${name}`,
+    text: `
+      email: ${email}  
+      message: ${message}`,
+  })
+}
+
+module.exports = { sendPasswordResetEmail, sendContactMessage };
