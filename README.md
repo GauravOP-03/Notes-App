@@ -97,9 +97,3 @@ This project is open source and available under the MIT License.
 * LinkedIn: [Gaurav Kumar](https://linkedin.com/in/gaurav-kumar-5813bb321)
 
 ---
-
-Let me know if:
-
-* You want to **add deployment instructions (e.g., Render, Vercel)**.
-* You’d like an **API reference section**.
-* You need **badges** (build, license, stars, etc.) at the top.
